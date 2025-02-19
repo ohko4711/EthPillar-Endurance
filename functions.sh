@@ -202,6 +202,9 @@ getNetwork(){
     11155111)
       NETWORK="Sepolia"
       ;;
+    648)
+      NETWORK="Endurance Mainnet"
+      ;;
     *)
       getEphemeryChainID
       if [[ "$result" = "$EPH_CHAIN_ID" ]]; then
