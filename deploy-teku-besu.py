@@ -5,7 +5,7 @@
 # Validator-Install: Standalone Teku BN + Standalone Teku VC + Besu EL + MEVboost
 # Quickstart :: Minority Client :: Docker-free
 #
-# Made for home and solo stakers 🏠🥩
+# Made for home and solo stakers 
 #
 # Acknowledgments
 # Validator-Install is branched from validator-install written by Accidental-green: https://github.com/accidental-green/validator-install
@@ -41,7 +41,7 @@ def clear_screen():
 clear_screen()  # Call the function to clear the screen
 
 # Valid configurations
-valid_networks = ['MAINNET', 'HOLESKY', 'SEPOLIA', 'EPHEMERY']
+valid_networks = ['MAINNET', 'HOLESKY', 'SEPOLIA', 'EPHEMERY', 'CUSTOM']
 valid_exec_clients = ['BESU']
 valid_consensus_clients = ['TEKU']
 valid_install_configs = ['Solo Staking Node', 'Full Node Only', 'Lido CSM Staking Node', 'Lido CSM Validator Client Only', 'Validator Client Only', 'Failover Staking Node']
@@ -238,7 +238,6 @@ if not NODE_ONLY and FEE_RECIPIENT_ADDRESS == "" and not args.skip_prompts:
         else:
             print("Invalid Ethereum address. Try again.")
 
-
 # Validates an CL beacon node address with port
 def validate_beacon_node_address(ip_port):
     pattern = r"^(http|https|ws):\/\/((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)(:?\d{1,5})?$"
@@ -291,6 +290,14 @@ elif eth_network == "sepolia":
     sync_urls = sepolia_sync_urls
 elif eth_network == "ephemery":
     sync_urls = ephemery_sync_urls
+elif eth_network == "custom":
+    def download_custom_config():
+        os.makedirs('/el-cl-genesis-data/custom_config_data', exist_ok=True)
+        os.system('wget https://raw.githubusercontent.com/OpenFusionist/network_config/main/genesis.json -O /el-cl-genesis-data/custom_config_data/chainspec.json')
+        os.system('wget https://raw.githubusercontent.com/OpenFusionist/network_config/main/config.yaml -O /el-cl-genesis-data/custom_config_data/config.yaml')
+        os.system('wget https://raw.githubusercontent.com/OpenFusionist/network_config/main/genesis.ssz -O /el-cl-genesis-data/custom_config_data/genesis.ssz')
+    download_custom_config()
+    sync_url = "/el-cl-genesis-data/custom_config_data/genesis.ssz"
 
 # Use a random sync url
 sync_url = random.choice(sync_urls)[1]
@@ -496,6 +503,10 @@ def download_and_install_besu():
 
         ##### BESU SERVICE FILE ###########
         besu_service_file = f'''[Unit]
+        
+        # if custom netwotk  add flag
+        #--genesis-file=/el-cl-genesis-data/custom_config_data/besu.json
+        #--network-id=648
 Description=Besu Execution Layer Client service for {eth_network.upper()}
 After=network-online.target
 Wants=network-online.target
@@ -607,6 +618,11 @@ def install_teku():
         else:
             _feeparameters=''
 
+        if eth_network == 'CUSTOM':
+            _network_params = f'--network=/el-cl-genesis-data/custom_config_data/config.yaml --initial-state=/el-cl-genesis-data/custom_config_data/genesis.ssz'
+        else:
+            _network_params = f'--network={eth_network}'
+
         ########### Teku SERVICE FILE #############
         teku_service_file = f'''[Unit]
 Description=Teku Beacon Node Consensus Client service for {eth_network.upper()}
@@ -624,7 +640,7 @@ KillSignal=SIGINT
 TimeoutStopSec=900
 Environment=JAVA_OPTS=-Xmx6g
 Environment=TEKU_OPTS=-XX:-HeapDumpOnOutOfMemoryError
-ExecStart=/usr/local/bin/teku/bin/teku --network={eth_network} --data-path=/var/lib/teku --data-storage-mode=minimal --initial-state={sync_url} --ee-endpoint=http://127.0.0.1:8551 --ee-jwt-secret-file={JWTSECRET_PATH} --rest-api-enabled=true --rest-api-port={CL_REST_PORT} --p2p-port={CL_P2P_PORT} --p2p-peer-upper-bound={CL_MAX_PEER_COUNT} --metrics-enabled=true --metrics-port=8008 {_feeparameters} {_mevparameters}
+ExecStart=/usr/local/bin/teku/bin/teku {_network_params} --data-path=/var/lib/teku --data-storage-mode=minimal --ee-endpoint=http://127.0.0.1:8551 --ee-jwt-secret-file={JWTSECRET_PATH} --rest-api-enabled=true --rest-api-port={CL_REST_PORT} --p2p-port={CL_P2P_PORT} --p2p-peer-upper-bound={CL_MAX_PEER_COUNT} --metrics-enabled=true --metrics-port=8008 {_feeparameters} {_mevparameters}
 
 [Install]
 WantedBy=multi-user.target
