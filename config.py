@@ -58,5 +58,5 @@ endurance_sync_urls = [
 ]
 
 endurance_devnet_sync_urls = [
-    ("Endurance-Devnet", "http://88.99.94.109:9781/"),
+    ("Endurance-Devnet", "http://78.46.91.61:9781/"),
 ]
