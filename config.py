@@ -52,3 +52,7 @@ ephemery_sync_urls = [
     ("Bordel", "https://checkpointz.bordel.wtf"),
     ("EF DevOps", "https://checkpoint-sync.ephemery.ethpandaops.io"),
 ]
+
+endurance_sync_urls = [
+    ("Endurance", "https://checkpointz.fusionist.io/"),
+]
