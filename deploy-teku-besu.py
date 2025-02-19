@@ -59,6 +59,9 @@ CL_P2P_PORT=os.getenv('CL_P2P_PORT')
 CL_REST_PORT=os.getenv('CL_REST_PORT')
 CL_MAX_PEER_COUNT=os.getenv('CL_MAX_PEER_COUNT')
 CL_IP_ADDRESS=os.getenv('CL_IP_ADDRESS')
+CL_TRUSTPEERS=os.getenv('CL_TRUSTPEERS')
+CL_STATICPEERS=os.getenv('CL_STATICPEERS')
+CL_BOOTNODES=os.getenv('CL_BOOTNODES')
 JWTSECRET_PATH=os.getenv('JWTSECRET_PATH')
 GRAFFITI=os.getenv('GRAFFITI')
 FEE_RECIPIENT_ADDRESS=os.getenv('FEE_RECIPIENT_ADDRESS')
@@ -288,6 +291,9 @@ if not args.skip_prompts:
 
 # for endurance network, EL,CL client custom genesis configuration
 def download_endurance_config():
+    # Save current working directory
+    original_dir = os.getcwd()
+    print(f"Before download_endurance_config:Original directory: {original_dir}")
     os.makedirs('/el-cl-genesis-data/custom_config_data', exist_ok=True)
     # Clean up existing directory if it exists
     if os.path.exists('/tmp/network_config'):
@@ -304,6 +310,9 @@ def download_endurance_config():
     shutil.copy('config.yaml', '/el-cl-genesis-data/custom_config_data/')
     shutil.rmtree('/tmp/network_config')
     
+    # Restore original working directory
+    os.chdir(original_dir)
+    
 # Initialize sync urls for selected network
 if eth_network == "mainnet":
     sync_urls = mainnet_sync_urls
@@ -314,7 +323,8 @@ elif eth_network == "sepolia":
 elif eth_network == "ephemery":
     sync_urls = ephemery_sync_urls
 elif eth_network == "endurance":
-    download_endurance_config()
+    # DEBUG: temp distable 
+    # download_endurance_config()
     sync_urls = endurance_sync_urls
 
 # Use a random sync url
@@ -515,6 +525,9 @@ def download_and_install_besu():
         # Move the binary to /usr/local/bin using sudo
         os.system(f"sudo mv {extracted_folder} ~/besu")
         os.system(f"sudo mv ~/besu /usr/local/bin/besu")
+        # Set ownership of Besu directory to execution user
+        # fix: /usr/local/bin/besu/VERSION_METADATA.json (Permission denied)
+        os.system("sudo chown -R execution:execution /usr/local/bin/besu")
 
         # Remove the besu.tar.gz file
         os.remove('besu.tar.gz')
@@ -529,14 +542,13 @@ def download_and_install_besu():
         --rpc-http-enabled=true 
         --sync-mode=SNAP 
         --data-storage-format=BONSAI 
-        --data-path="/var/lib/besu"
-        --engine-jwt-secret={JWTSECRET_PATH}
-        '''
+        --data-path=/var/lib/besu 
+        --engine-jwt-secret={JWTSECRET_PATH}'''
+
         if eth_network == 'endurance':
             besu_exec_flag = f'''{besu_exec_flag} 
-            --network_id=648 
-            --genesis-file=/el-cl-genesis-data/custom_config_data/besu.json 
-            '''
+        --network-id=648 
+        --genesis-file=/el-cl-genesis-data/custom_config_data/besu.json'''
         else:
             besu_exec_flag = f'{besu_exec_flag} --network={eth_network}'
         besu_service_file = f'''[Unit]
@@ -651,7 +663,7 @@ def install_teku():
             _feeparameters=''
 
         if eth_network == 'endurance':
-            _network_params = f'--network=/el-cl-genesis-data/custom_config_data/config.yaml --initial-state=/el-cl-genesis-data/custom_config_data/genesis.ssz'
+            _network_params = f'--network=/el-cl-genesis-data/custom_config_data/config.yaml --initial-state=/el-cl-genesis-data/custom_config_data/genesis.ssz --p2p-discovery-bootnodes=${CL_BOOTNODES} --p2p-static-peers=${CL_STATICPEERS} '
         else:
             _network_params = f'--network={eth_network}'
 
