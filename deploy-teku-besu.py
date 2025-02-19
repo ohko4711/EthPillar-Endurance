@@ -11,6 +11,7 @@
 # Validator-Install is branched from validator-install written by Accidental-green: https://github.com/accidental-green/validator-install
 # The groundwork for this project was established through their previous efforts.
 
+import time
 import os
 import requests
 import re
@@ -118,6 +119,9 @@ if not args.network and not args.skip_prompts:
 
     # Exit selected
     if index == 5:
+        # add some hint for choice which network
+        print("Exiting...", valid_networks[index])
+        time.sleep(5)
         exit(0)
 
     # Set network
