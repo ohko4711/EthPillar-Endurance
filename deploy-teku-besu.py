@@ -533,22 +533,10 @@ def download_and_install_besu():
         os.remove('besu.tar.gz')
 
         ##### BESU SERVICE FILE ###########
-        besu_exec_flag = f''' --p2p-port={EL_P2P_PORT} 
-        --rpc-http-port={EL_RPC_PORT} 
-        --engine-rpc-port=8551 
-        --max-peers={EL_MAX_PEER_COUNT} 
-        --metrics-enabled=true 
-        --metrics-port=6060 
-        --rpc-http-enabled=true 
-        --sync-mode=SNAP 
-        --data-storage-format=BONSAI 
-        --data-path=/var/lib/besu 
-        --engine-jwt-secret={JWTSECRET_PATH}'''
+        besu_exec_flag = f''' --p2p-port={EL_P2P_PORT} --rpc-http-port={EL_RPC_PORT} --engine-rpc-port=8551 --max-peers={EL_MAX_PEER_COUNT} --metrics-enabled=true --metrics-port=6060 --rpc-http-enabled=true --sync-mode=SNAP --data-storage-format=BONSAI  --data-path=/var/lib/besu --engine-jwt-secret={JWTSECRET_PATH}'''
 
         if eth_network == 'endurance':
-            besu_exec_flag = f'''{besu_exec_flag} 
-        --network-id=648 
-        --genesis-file=/el-cl-genesis-data/custom_config_data/besu.json'''
+            besu_exec_flag = f'''{besu_exec_flag} --network-id=648 --genesis-file=/el-cl-genesis-data/custom_config_data/besu.json'''
         else:
             besu_exec_flag = f'{besu_exec_flag} --network={eth_network}'
         besu_service_file = f'''[Unit]
