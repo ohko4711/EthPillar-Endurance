@@ -291,6 +291,8 @@ def download_endurance_config():
     os.makedirs('/el-cl-genesis-data/custom_config_data', exist_ok=True)
     subprocess.run(['git', 'clone', 'https://github.com/OpenFusionist/network_config', '/tmp/network_config'])
     os.chdir('/tmp/network_config')
+    # Add execute permissions to decompress.sh
+    subprocess.run(['chmod', '+x', './decompress.sh'])
     subprocess.run(['./decompress.sh'])
     # shutil.copy('genesis.json', '/el-cl-genesis-data/custom_config_data/')
     shutil.copy('besu.json', '/el-cl-genesis-data/custom_config_data/')
