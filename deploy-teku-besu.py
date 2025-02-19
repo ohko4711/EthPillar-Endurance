@@ -289,11 +289,15 @@ if not args.skip_prompts:
 # for endurance network, EL,CL client custom genesis configuration
 def download_endurance_config():
     os.makedirs('/el-cl-genesis-data/custom_config_data', exist_ok=True)
+    # Clean up existing directory if it exists
+    if os.path.exists('/tmp/network_config'):
+        shutil.rmtree('/tmp/network_config')
     subprocess.run(['git', 'clone', 'https://github.com/OpenFusionist/network_config', '/tmp/network_config'])
     os.chdir('/tmp/network_config')
     # Add execute permissions to decompress.sh
     subprocess.run(['chmod', '+x', './decompress.sh'])
-    subprocess.run(['./decompress.sh'])
+    # Use bash explicitly to run the script
+    subprocess.run(['bash', './decompress.sh'])
     # shutil.copy('genesis.json', '/el-cl-genesis-data/custom_config_data/')
     shutil.copy('besu.json', '/el-cl-genesis-data/custom_config_data/')
     shutil.copy('genesis.ssz', '/el-cl-genesis-data/custom_config_data/')
