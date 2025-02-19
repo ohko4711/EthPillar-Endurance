@@ -56,3 +56,7 @@ ephemery_sync_urls = [
 endurance_sync_urls = [
     ("Endurance", "https://checkpointz.fusionist.io/"),
 ]
+
+endurance_devnet_sync_urls = [
+    ("Endurance-Devnet", "http://88.99.94.109:9781/"),
+]

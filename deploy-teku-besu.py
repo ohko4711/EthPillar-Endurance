@@ -42,7 +42,7 @@ def clear_screen():
 clear_screen()  # Call the function to clear the screen
 
 # Valid configurations
-valid_networks = ['MAINNET', 'HOLESKY', 'SEPOLIA', 'EPHEMERY', 'ENDURANCE']
+valid_networks = ['MAINNET', 'HOLESKY', 'SEPOLIA', 'EPHEMERY', 'ENDURANCE',"ENDURANCE_DEVNET"]
 valid_exec_clients = ['BESU']
 valid_consensus_clients = ['TEKU']
 valid_install_configs = ['Solo Staking Node', 'Full Node Only', 'Lido CSM Staking Node', 'Lido CSM Validator Client Only', 'Validator Client Only', 'Failover Staking Node']
@@ -59,9 +59,17 @@ CL_P2P_PORT=os.getenv('CL_P2P_PORT')
 CL_REST_PORT=os.getenv('CL_REST_PORT')
 CL_MAX_PEER_COUNT=os.getenv('CL_MAX_PEER_COUNT')
 CL_IP_ADDRESS=os.getenv('CL_IP_ADDRESS')
+
+# Endurance Mainnet
 CL_TRUSTPEERS=os.getenv('CL_TRUSTPEERS')
 CL_STATICPEERS=os.getenv('CL_STATICPEERS')
 CL_BOOTNODES=os.getenv('CL_BOOTNODES')
+
+# Endurance Devnet
+ENDURANCE_DEVNET_CL_STATICPEERS=os.getenv('ENDURANCE_DEVNET_CL_STATICPEERS')
+ENDURANCE_DEVNET_CL_TRUSTPEERS=os.getenv('ENDURANCE_DEVNET_CL_TRUSTPEERS')
+ENDURANCE_DEVNET_CL_BOOTNODES=os.getenv('ENDURANCE_DEVNET_CL_BOOTNODES')
+
 JWTSECRET_PATH=os.getenv('JWTSECRET_PATH')
 GRAFFITI=os.getenv('GRAFFITI')
 FEE_RECIPIENT_ADDRESS=os.getenv('FEE_RECIPIENT_ADDRESS')
@@ -121,7 +129,7 @@ if not args.network and not args.skip_prompts:
     index = SelectionMenu.get_selection(valid_networks,title='Validator Install Quickstart :: CoinCashew.com',subtitle='Installs Besu EL / Teku BN / Teku VC / MEVboost\nSelect Ethereum network:')
 
     # Exit selected
-    if index == 5:
+    if index == 6:
         # add some hint for choice which network
         print("Exiting...", valid_networks[index])
         time.sleep(5)
@@ -309,6 +317,52 @@ def download_endurance_config():
     shutil.copy('genesis.ssz', '/el-cl-genesis-data/custom_config_data/')
     shutil.copy('config.yaml', '/el-cl-genesis-data/custom_config_data/')
     shutil.rmtree('/tmp/network_config')
+    # Restore original working directory
+    os.chdir(original_dir)
+
+# for endurance devnet network, EL,CL client custom genesis configuration
+def download_endurance_devnet_config():
+    # Save current working directory
+    original_dir = os.getcwd()
+    temp_dir = '/tmp/network_config'
+    print(f"Before download_endurance_config:Original directory: {original_dir}")
+    os.makedirs('/el-cl-genesis-data/custom_config_data', exist_ok=True)
+    if os.path.exists(temp_dir):
+        shutil.rmtree(temp_dir)
+    # Create a temporary directory for download
+    temp_dir = tempfile.mkdtemp()
+    os.chdir(temp_dir)
+
+    # Create expect script for automated scp with password
+    expect_script = '''#!/usr/bin/expect -f
+set timeout -1
+spawn scp -P 23 u383300-sub2@u383300.your-storagebox.de:/home/el-cl-genesis-data_cancun.tar.gz el-cl-genesis-data.tar.gz
+expect "password:"
+send "Qp5PP34xmbsAMFHQ\\r"
+expect eof
+'''
+    # Write expect script to temporary file
+    with open('download_script.exp', 'w') as f:
+        f.write(expect_script)
+    
+    # Make expect script executable
+    subprocess.run(['chmod', '+x', 'download_script.exp'])
+    
+    # Install expect if not present
+    subprocess.run(['sudo', 'apt-get', 'install', '-y', 'expect'], check=True)
+    
+    # Run the expect script to download the file
+    subprocess.run(['./download_script.exp'])
+    
+    # Extract only the needed files
+    with tarfile.open('el-cl-genesis-data.tar.gz', 'r:gz') as tar:
+        for member in tar.getmembers():
+            if member.name in ['besu.json', 'genesis.ssz', 'config.yaml']:
+                tar.extract(member, '/el-cl-genesis-data/custom_config_data')
+    # Clean up
+    os.remove('download_script.exp')
+    os.remove('el-cl-genesis-data.tar.gz')
+    shutil.rmtree(temp_dir)
     
     # Restore original working directory
     os.chdir(original_dir)
@@ -326,6 +380,9 @@ elif eth_network == "endurance":
     # DEBUG: temp distable 
     # download_endurance_config()
     sync_urls = endurance_sync_urls
+elif eth_network == "endurance_devnet":
+    download_endurance_devnet_config()
+    sync_urls = endurance_devnet_sync_urls
 
 # Use a random sync url
 sync_url = random.choice(sync_urls)[1]
@@ -537,6 +594,8 @@ def download_and_install_besu():
 
         if eth_network == 'endurance':
             besu_exec_flag = f'''{besu_exec_flag} --network-id=648 --genesis-file=/el-cl-genesis-data/custom_config_data/besu.json'''
+        elif eth_network == 'endurance_devnet':
+            besu_exec_flag = f'{besu_exec_flag} --network-id=6480000002 --genesis-file=/el-cl-genesis-data/custom_config_data/besu.json'
         else:
             besu_exec_flag = f'{besu_exec_flag} --network={eth_network}'
         besu_service_file = f'''[Unit]
@@ -652,6 +711,8 @@ def install_teku():
 
         if eth_network == 'endurance':
             _network_params = f'--network=/el-cl-genesis-data/custom_config_data/config.yaml --p2p-discovery-bootnodes={CL_BOOTNODES} --p2p-static-peers={CL_STATICPEERS} --checkpoint-sync-url={sync_url}'
+        elif eth_network == 'endurance_devnet':
+            _network_params = f'--network=/el-cl-genesis-data/custom_config_data/config.yaml --p2p-discovery-bootnodes={ENDURANCE_DEVNET_CL_BOOTNODES} --p2p-static-peers={ENDURANCE_DEVNET_CL_STATICPEERS} --checkpoint-sync-url={sync_url}'
         else:
             _network_params = f'--network={eth_network}'
 
