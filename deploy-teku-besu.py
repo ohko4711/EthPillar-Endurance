@@ -298,7 +298,7 @@ if not args.skip_prompts:
         exit(0)
 
 # for endurance network, EL,CL client custom genesis configuration
-def download_endurance_config():
+def download_endurance_config(url):
     # Save current working directory
     original_dir = os.getcwd()
     print(f"Before download_endurance_config:Original directory: {original_dir}")
@@ -306,7 +306,7 @@ def download_endurance_config():
     # Clean up existing directory if it exists
     if os.path.exists('/tmp/network_config'):
         shutil.rmtree('/tmp/network_config')
-    subprocess.run(['git', 'clone', 'https://github.com/OpenFusionist/network_config', '/tmp/network_config'])
+    subprocess.run(['git', 'clone', url, '/tmp/network_config'])
     os.chdir('/tmp/network_config')
     # Add execute permissions to decompress.sh
     subprocess.run(['chmod', '+x', './decompress.sh'])
@@ -320,52 +320,6 @@ def download_endurance_config():
     # Restore original working directory
     os.chdir(original_dir)
 
-# for endurance devnet network, EL,CL client custom genesis configuration
-def download_endurance_devnet_config():
-    # Save current working directory
-    original_dir = os.getcwd()
-    temp_dir = '/tmp/network_config'
-    print(f"Before download_endurance_config:Original directory: {original_dir}")
-    os.makedirs('/el-cl-genesis-data/custom_config_data', exist_ok=True)
-    if os.path.exists(temp_dir):
-        shutil.rmtree(temp_dir)
-    # Create a temporary directory for download
-    temp_dir = tempfile.mkdtemp()
-    os.chdir(temp_dir)
-
-    # Create expect script for automated scp with password
-    expect_script = '''#!/usr/bin/expect -f
-set timeout -1
-spawn scp -P 23 u383300-sub2@u383300.your-storagebox.de:/home/el-cl-genesis-data_cancun.tar.gz el-cl-genesis-data.tar.gz
-expect "password:"
-send "Qp5PP34xmbsAMFHQ\\r"
-expect eof
-'''
-    # Write expect script to temporary file
-    with open('download_script.exp', 'w') as f:
-        f.write(expect_script)
-    
-    # Make expect script executable
-    subprocess.run(['chmod', '+x', 'download_script.exp'])
-    
-    # Install expect if not present
-    subprocess.run(['sudo', 'apt-get', 'install', '-y', 'expect'], check=True)
-    
-    # Run the expect script to download the file
-    subprocess.run(['./download_script.exp'])
-    
-    # Extract only the needed files
-    with tarfile.open('el-cl-genesis-data.tar.gz', 'r:gz') as tar:
-        for member in tar.getmembers():
-            if member.name in ['besu.json', 'genesis.ssz', 'config.yaml']:
-                tar.extract(member, '/el-cl-genesis-data/custom_config_data')
-    # Clean up
-    os.remove('download_script.exp')
-    os.remove('el-cl-genesis-data.tar.gz')
-    shutil.rmtree(temp_dir)
-    
-    # Restore original working directory
-    os.chdir(original_dir)
     
 # Initialize sync urls for selected network
 if eth_network == "mainnet":
@@ -378,10 +332,10 @@ elif eth_network == "ephemery":
     sync_urls = ephemery_sync_urls
 elif eth_network == "endurance":
     # DEBUG: temp distable 
-    # download_endurance_config()
+    # download_endurance_config("https://github.com/OpenFusionist/network_config")
     sync_urls = endurance_sync_urls
 elif eth_network == "endurance_devnet":
-    download_endurance_devnet_config()
+    download_endurance_config("https://github.com/OpenFusionist/devnet_network_config")
     sync_urls = endurance_devnet_sync_urls
 
 # Use a random sync url
