@@ -553,7 +553,7 @@ Restart=on-failure
 RestartSec=3
 KillSignal=SIGINT
 TimeoutStopSec=900
-Environment="JAVA_OPTS=-Xmx5g"
+Environment="JAVA_OPTS=-Xmx16g"
 ExecStart=/usr/local/bin/besu/bin/besu {besu_exec_flag}
 [Install]
 WantedBy=multi-user.target
@@ -651,7 +651,7 @@ def install_teku():
             _feeparameters=''
 
         if eth_network == 'endurance':
-            _network_params = f'--network=/el-cl-genesis-data/custom_config_data/config.yaml --initial-state=/el-cl-genesis-data/custom_config_data/genesis.ssz --p2p-discovery-bootnodes=${CL_BOOTNODES} --p2p-static-peers=${CL_STATICPEERS} '
+            _network_params = f'--network=/el-cl-genesis-data/custom_config_data/config.yaml --p2p-discovery-bootnodes={CL_BOOTNODES} --p2p-static-peers={CL_STATICPEERS} --checkpoint-sync-url={sync_url}'
         else:
             _network_params = f'--network={eth_network}'
 
@@ -670,7 +670,7 @@ Restart=on-failure
 RestartSec=3
 KillSignal=SIGINT
 TimeoutStopSec=900
-Environment=JAVA_OPTS=-Xmx6g
+Environment=JAVA_OPTS=-Xmx16g
 Environment=TEKU_OPTS=-XX:-HeapDumpOnOutOfMemoryError
 ExecStart=/usr/local/bin/teku/bin/teku {_network_params} --data-path=/var/lib/teku --data-storage-mode=minimal --ee-endpoint=http://127.0.0.1:8551 --ee-jwt-secret-file={JWTSECRET_PATH} --rest-api-enabled=true --rest-api-port={CL_REST_PORT} --p2p-port={CL_P2P_PORT} --p2p-peer-upper-bound={CL_MAX_PEER_COUNT} --metrics-enabled=true --metrics-port=8008 {_feeparameters} {_mevparameters}
 
