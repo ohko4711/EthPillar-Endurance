@@ -41,7 +41,7 @@ def clear_screen():
 clear_screen()  # Call the function to clear the screen
 
 # Valid configurations
-valid_networks = ['MAINNET', 'HOLESKY', 'SEPOLIA', 'EPHEMERY', 'CUSTOM']
+valid_networks = ['MAINNET', 'HOLESKY', 'SEPOLIA', 'EPHEMERY', 'ENDURANCE']
 valid_exec_clients = ['BESU']
 valid_consensus_clients = ['TEKU']
 valid_install_configs = ['Solo Staking Node', 'Full Node Only', 'Lido CSM Staking Node', 'Lido CSM Validator Client Only', 'Validator Client Only', 'Failover Staking Node']
@@ -53,6 +53,7 @@ load_dotenv("env")
 EL_P2P_PORT=os.getenv('EL_P2P_PORT')
 EL_RPC_PORT=os.getenv('EL_RPC_PORT')
 EL_MAX_PEER_COUNT=os.getenv('EL_MAX_PEER_COUNT')
+EL_BOOTNODES=os.getenv('EL_BOOTNODES')
 CL_P2P_PORT=os.getenv('CL_P2P_PORT')
 CL_REST_PORT=os.getenv('CL_REST_PORT')
 CL_MAX_PEER_COUNT=os.getenv('CL_MAX_PEER_COUNT')
@@ -281,6 +282,18 @@ if not args.skip_prompts:
         print(f'\nInstall cancelled by user. \n\nWhen ready, re-run install command:\npython3 {file_name}')
         exit(0)
 
+# for endurance network, EL,CL client custom genesis configuration
+def download_endurance_config():
+    os.makedirs('/el-cl-genesis-data/custom_config_data', exist_ok=True)
+    subprocess.run(['git', 'clone', 'https://github.com/OpenFusionist/network_config', '/tmp/network_config'])
+    os.chdir('/tmp/network_config')
+    subprocess.run(['./decompress.sh'])
+    # shutil.copy('genesis.json', '/el-cl-genesis-data/custom_config_data/')
+    shutil.copy('besu.json', '/el-cl-genesis-data/custom_config_data/')
+    shutil.copy('genesis.ssz', '/el-cl-genesis-data/custom_config_data/')
+    shutil.copy('config.yaml', '/el-cl-genesis-data/custom_config_data/')
+    shutil.rmtree('/tmp/network_config')
+    
 # Initialize sync urls for selected network
 if eth_network == "mainnet":
     sync_urls = mainnet_sync_urls
@@ -290,14 +303,9 @@ elif eth_network == "sepolia":
     sync_urls = sepolia_sync_urls
 elif eth_network == "ephemery":
     sync_urls = ephemery_sync_urls
-elif eth_network == "custom":
-    def download_custom_config():
-        os.makedirs('/el-cl-genesis-data/custom_config_data', exist_ok=True)
-        os.system('wget https://raw.githubusercontent.com/OpenFusionist/network_config/main/genesis.json -O /el-cl-genesis-data/custom_config_data/chainspec.json')
-        os.system('wget https://raw.githubusercontent.com/OpenFusionist/network_config/main/config.yaml -O /el-cl-genesis-data/custom_config_data/config.yaml')
-        os.system('wget https://raw.githubusercontent.com/OpenFusionist/network_config/main/genesis.ssz -O /el-cl-genesis-data/custom_config_data/genesis.ssz')
-    download_custom_config()
-    sync_url = "/el-cl-genesis-data/custom_config_data/genesis.ssz"
+elif eth_network == "endurance":
+    download_endurance_config()
+    sync_urls = endurance_sync_urls
 
 # Use a random sync url
 sync_url = random.choice(sync_urls)[1]
@@ -502,11 +510,26 @@ def download_and_install_besu():
         os.remove('besu.tar.gz')
 
         ##### BESU SERVICE FILE ###########
+        besu_exec_flag = f''' --p2p-port={EL_P2P_PORT} 
+        --rpc-http-port={EL_RPC_PORT} 
+        --engine-rpc-port=8551 
+        --max-peers={EL_MAX_PEER_COUNT} 
+        --metrics-enabled=true 
+        --metrics-port=6060 
+        --rpc-http-enabled=true 
+        --sync-mode=SNAP 
+        --data-storage-format=BONSAI 
+        --data-path="/var/lib/besu"
+        --engine-jwt-secret={JWTSECRET_PATH}
+        '''
+        if eth_network == 'endurance':
+            besu_exec_flag = f'''{besu_exec_flag} 
+            --network_id=648 
+            --genesis-file=/el-cl-genesis-data/custom_config_data/besu.json 
+            '''
+        else:
+            besu_exec_flag = f'{besu_exec_flag} --network={eth_network}'
         besu_service_file = f'''[Unit]
-        
-        # if custom netwotk  add flag
-        #--genesis-file=/el-cl-genesis-data/custom_config_data/besu.json
-        #--network-id=648
 Description=Besu Execution Layer Client service for {eth_network.upper()}
 After=network-online.target
 Wants=network-online.target
@@ -521,8 +544,7 @@ RestartSec=3
 KillSignal=SIGINT
 TimeoutStopSec=900
 Environment="JAVA_OPTS=-Xmx5g"
-ExecStart=/usr/local/bin/besu/bin/besu --network={eth_network} --p2p-port={EL_P2P_PORT} --rpc-http-port={EL_RPC_PORT} --engine-rpc-port=8551 --max-peers={EL_MAX_PEER_COUNT} --metrics-enabled=true --metrics-port=6060 --rpc-http-enabled=true --sync-mode=SNAP --data-storage-format=BONSAI --data-path="/var/lib/besu" --engine-jwt-secret={JWTSECRET_PATH}
-
+ExecStart=/usr/local/bin/besu/bin/besu {besu_exec_flag}
 [Install]
 WantedBy=multi-user.target
 '''
@@ -618,7 +640,7 @@ def install_teku():
         else:
             _feeparameters=''
 
-        if eth_network == 'CUSTOM':
+        if eth_network == 'endurance':
             _network_params = f'--network=/el-cl-genesis-data/custom_config_data/config.yaml --initial-state=/el-cl-genesis-data/custom_config_data/genesis.ssz'
         else:
             _network_params = f'--network={eth_network}'
@@ -678,6 +700,7 @@ def install_teku_validator():
         subprocess.run(['sudo', 'useradd', '--no-create-home', '--shell', '/bin/false', 'validator'])
         subprocess.run(['sudo', 'chown', '-R', 'validator:validator', '/var/lib/teku_validator'])
 
+# ref: https://docs.teku.consensys.io/reference/cli/subcommands/validator-client#network use network=auto fetch the network configuration from the beacon node endpoint directly
         teku_validator_file = f'''[Unit]
 Description=Teku Validator Client service for {eth_network.upper()}
 Wants=network-online.target
@@ -692,7 +715,7 @@ Restart=on-failure
 RestartSec=3
 KillSignal=SIGINT
 TimeoutStopSec=900
-ExecStart=/usr/local/bin/teku/bin/teku validator-client --network={eth_network} --data-path=/var/lib/teku_validator --validator-keys=/var/lib/teku_validator/validator_keys:/var/lib/teku_validator/validator_keys --metrics-enabled=true --metrics-port=8009 --validators-graffiti={GRAFFITI} {_beaconnodeparameters} {_feeparameters} {_mevparameters}
+ExecStart=/usr/local/bin/teku/bin/teku validator-client --network=auto --data-path=/var/lib/teku_validator --validator-keys=/var/lib/teku_validator/validator_keys:/var/lib/teku_validator/validator_keys --metrics-enabled=true --metrics-port=8009 --validators-graffiti={GRAFFITI} {_beaconnodeparameters} {_feeparameters} {_mevparameters}
 
 [Install]
 WantedBy=multi-user.target
