@@ -21,6 +21,10 @@ sepolia_relay_options = [
     {'name': 'Flashbots', 'url': 'https://0x845bd072b7cd566f02faeb0a4033ce9399e42839ced64e8b2adcfc859ed1e8e1a5a293336a49feac6d9a5edb779be53a@boost-relay-sepolia.flashbots.net'}
 ]
 
+endurance_devnet_relay_options = [
+    {'name': 'devnet', 'url': 'http://0xa55c1285d84ba83a5ad26420cd5ad3091e49c55a813eee651cd467db38a8c8e63192f47955e9376f6b42f6d190571cb5@95.217.233.186:9062'}
+]
+
 # Checkpoint-Sync Data
 mainnet_sync_urls = [
     ("ETHSTAKER", "https://beaconstate.ethstaker.cc"),
