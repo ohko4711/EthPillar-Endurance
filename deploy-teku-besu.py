@@ -390,6 +390,7 @@ def install_mevboost():
             exit(1)
 
         # Download the latest release binary
+        download_url = "https://github.com/flashbots/mev-boost/releases/download/v1.9-rc2/mev-boost_1.9-rc2_linux_amd64.tar.gz"
         print(f">> Downloading mevboost > URL: {download_url}")
 
         try:
@@ -421,43 +422,57 @@ def install_mevboost():
 
         ##### MEV Boost Service File
         mev_boost_service_file_lines = [
-        '[Unit]',
-        f'Description=MEV-Boost Service for {eth_network.upper()}',
-        'Wants=network-online.target',
-        'After=network-online.target',
-        'Documentation=https://www.coincashew.com',
-        '',
-        '[Service]',
-        'User=mevboost',
-        'Group=mevboost',
-        'Type=simple',
-        'Restart=always',
-        'RestartSec=5',
-        'ExecStart=/usr/local/bin/mev-boost \\',
-        f'    -{eth_network} \\',
-        f'    -min-bid {MEV_MIN_BID} \\',
-        '    -relay-check \\',
+            '[Unit]',
+            f'Description=MEV-Boost Service for {eth_network.upper()}',
+            'Wants=network-online.target',
+            'After=network-online.target',
+            'Documentation=https://www.coincashew.com',
+            '',
+            '[Service]',
+            'User=mevboost',
+            'Group=mevboost',
+            'Type=simple',
+            'Restart=always',
+            'RestartSec=5',
+            'ExecStart=/usr/local/bin/mev-boost -relay-check\\'
         ]
 
-        if eth_network == 'mainnet':
-            relay_options=mainnet_relay_options
-        elif eth_network == 'holesky':
-            relay_options=holesky_relay_options
+        # Add custom endurance network parameters
+        if eth_network == 'endurance_devnet':
+            mev_boost_service_file_lines.extend([
+                '    -genesis-fork-version 0x10000001 \\',
+                '    -genesis-timestamp 1705568400 \\'
+            ])
         else:
-            relay_options=sepolia_relay_options
+            # Standard network configuration
+            mev_boost_service_file_lines.extend([
+                f'    -{eth_network} \\'
+            ])
+            
+            # Add network-specific relay options
+        relay_options = {
+            'mainnet': mainnet_relay_options,
+            'holesky': holesky_relay_options,
+            'sepolia': sepolia_relay_options,
+            'endurance_devnet': endurance_devnet_relay_options
+        }.get(eth_network, sepolia_relay_options)
 
-        for relay in relay_options:
-            relay_line = f'    -relay {relay["url"]} \\'
+        # Add relay URLs
+        for idx, relay in enumerate(relay_options):
+            is_last_relay = idx == len(relay_options) - 1
+            relay_line = f'    -relay {relay["url"]}'
+            if not is_last_relay:
+                relay_line += ' \\'
             mev_boost_service_file_lines.append(relay_line)
 
-        # Remove the trailing '\\' from the last relay line
-        mev_boost_service_file_lines[-1] = mev_boost_service_file_lines[-1].rstrip(' \\')
-
+        # Add service installation section
         mev_boost_service_file_lines.extend([
             '',
             '[Install]',
-            'WantedBy=multi-user.target',
+            'WantedBy=multi-user.target'
         ])
+
+        # Join all lines with newlines
         mev_boost_service_file = '\n'.join(mev_boost_service_file_lines)
 
         mev_boost_temp_file = 'mev_boost_temp.service'
