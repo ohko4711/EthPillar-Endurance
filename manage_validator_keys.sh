@@ -122,6 +122,7 @@ function _getNetwork(){
           "mainnet" "Ethereum - Real ETH. Real staking rewards." \
           "holesky" "long term Testnet  - Suitable for staking practice." \
           "ephemery" "short term Testnet - Ideal for staking practice. Monthly resets." \
+          "endurance_devnet" "short term for Endurance Devnet - Ideal for staking practice. No rewards."
           3>&1 1>&2 2>&3)
 }
 
@@ -233,6 +234,14 @@ function setConfig(){
             FAUCET="https://faucet.bordel.wtf"
             HOMEPAGE="https://ephemery.dev"
             EXPLORER="https://beaconlight.ephemery.dev"
+          ;;
+          endurance_devnet)
+            LAUNCHPAD_URL="https://staking.fusionist.io/en/"
+            # TODO: 
+            FAUCET=""
+            HOMEPAGE="https://www.fusionist.io/"
+            # TODO: config beaconcha.in for endurance devnet solv bigtabel issues
+            EXPLORER="http://78.46.91.61:9777/"
           ;;
     esac
 
