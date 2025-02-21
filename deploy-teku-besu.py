@@ -679,9 +679,9 @@ def install_teku():
             _feeparameters=''
 
         if eth_network == 'endurance':
-            _network_params = f'--network=/el-cl-genesis-data/custom_config_data/config.yaml --p2p-discovery-bootnodes={CL_BOOTNODES} --p2p-static-peers={CL_STATICPEERS} --checkpoint-sync-url={sync_url}'
+            _network_params = f'--network=/el-cl-genesis-data/custom_config_data/config.yaml --p2p-discovery-bootnodes={CL_BOOTNODES} --p2p-static-peers={CL_STATICPEERS} --checkpoint-sync-url={sync_url} --ignore-weak-subjectivity-period-enabled'
         elif eth_network == 'endurance_devnet':
-            _network_params = f'--network=/el-cl-genesis-data/custom_config_data/config.yaml --p2p-discovery-bootnodes={ENDURANCE_DEVNET_CL_BOOTNODES} --p2p-static-peers={ENDURANCE_DEVNET_CL_STATICPEERS} --checkpoint-sync-url={sync_url}'
+            _network_params = f'--network=/el-cl-genesis-data/custom_config_data/config.yaml --p2p-discovery-bootnodes={ENDURANCE_DEVNET_CL_BOOTNODES} --p2p-static-peers={ENDURANCE_DEVNET_CL_STATICPEERS} --checkpoint-sync-url={sync_url} --ignore-weak-subjectivity-period-enabled'
         else:
             _network_params = f'--network={eth_network}'
 
