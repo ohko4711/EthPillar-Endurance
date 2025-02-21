@@ -21,8 +21,8 @@ source $BASE_DIR/functions.sh
 source $BASE_DIR/env
 
 # Pinned version of ethstaker-deposit-cli
-edc_version="1.0.0"
-edc_hash="4ce275e"
+edc_version="0.0.2"
+edc_hash="4ac463b"
 
 # Get machine info
 _platform=$(get_platform)
@@ -46,8 +46,7 @@ function downloadEthstakerDepositCli(){
     sudo apt install jq curl -y
 
     #Setup variables
-    RELEASE_URL="https://api.github.com/repos/eth-educators/ethstaker-deposit-cli/releases/latest"
-    BINARIES_URL="https://github.com/eth-educators/ethstaker-deposit-cli/releases/download/v${edc_version}/ethstaker_deposit-cli-${edc_hash}-${_platform}-${_arch}.tar.gz"
+    BINARIES_URL="https://github.com/ohko4711/ethstaker-deposit-cli/releases/download/v${edc_version}/ethstaker_deposit-cli-${edc_hash}-${_platform}-${_arch}.tar.gz"
     BINARY_FILE="ethstaker_deposit-cli.tar.gz"
 
     [[ -z $BINARIES_URL ]] && echo "Error: Unable to determine BINARIES URL" && exit 1
@@ -118,10 +117,11 @@ function _getEthAddy(){
 
 function _getNetwork(){
     NETWORK=$(whiptail --title "Network" --menu \
-          "For which network are you generating validator keys?" 10 78 3 \
+          "For which network are you generating validator keys?" 12 90 4 \
           "mainnet" "Ethereum - Real ETH. Real staking rewards." \
           "holesky" "long term Testnet  - Suitable for staking practice." \
           "ephemery" "short term Testnet - Ideal for staking practice. Monthly resets." \
+          "endurance_devnet" "short term for Endurance Devnet - Ideal for staking practice. No rewards." \
           3>&1 1>&2 2>&3)
 }
 
@@ -233,6 +233,17 @@ function setConfig(){
             FAUCET="https://faucet.bordel.wtf"
             HOMEPAGE="https://ephemery.dev"
             EXPLORER="https://beaconlight.ephemery.dev"
+          ;;
+          endurance_devnet)
+            LAUNCHPAD_URL="https://staking.fusionist.io/en/"
+            LAUNCHPAD_URL_LIDO=""  # No Lido support for endurance devnet
+            CSM_FEE_RECIPIENT_ADDRESS=""  # No CSM support for endurance devnet
+            CSM_WITHDRAWAL_ADDRESS=""  # No CSM support for endurance devnet
+            CSM_SENTINEL_URL=""  # No CSM sentinel for endurance devnet
+            FAUCET=""
+            HOMEPAGE="https://www.fusionist.io/"
+            # TODO: config beaconcha.in for endurance devnet solv bigtabel issues
+            EXPLORER="http://78.46.91.61:9777/"
           ;;
     esac
 
@@ -401,6 +412,8 @@ function queryValidatorQueue(){
     BEACONCHAIN_URLS["mainnet"]="https://beaconcha.in"
     BEACONCHAIN_URLS["holesky"]="https://holesky.beaconcha.in"
     BEACONCHAIN_URLS["ephemery"]="https://beaconchain.ephemery.dev"
+    # TODO: temp use maninet https://beacon.fusionist.io//api/v1/validators/queue
+    BEACONCHAIN_URLS["endurance_devnet"]="https://beacon.fusionist.io"  
 
     # Dencun entry churn cap
     CHURN_ENTRY_PER_EPOCH=8
