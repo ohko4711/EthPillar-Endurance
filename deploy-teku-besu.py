@@ -42,7 +42,7 @@ def clear_screen():
 clear_screen()  # Call the function to clear the screen
 
 # Valid configurations
-valid_networks = ['MAINNET', 'HOLESKY', 'SEPOLIA', 'EPHEMERY', 'ENDURANCE', 'ENDURANCE_DEVNET']
+valid_networks = ['MAINNET', 'HOLESKY', 'SEPOLIA', 'EPHEMERY', 'ENDURANCE', "ENDURANCE_DEVNET"]
 valid_exec_clients = ['BESU']
 valid_consensus_clients = ['TEKU']
 valid_install_configs = ['Solo Staking Node', 'Full Node Only', 'Lido CSM Staking Node', 'Lido CSM Validator Client Only', 'Validator Client Only', 'Failover Staking Node']
@@ -304,12 +304,7 @@ def download_endurance_config(url):
     print(f"Before download_endurance_config:Original directory: {original_dir}")
     print(f"download_endurance_config:URL: {url}")
     print(f"Ready to download endurance network genesis configuration")
-    
-    # Use user's home directory instead of root directory
-    home_dir = os.path.expanduser('~')
-    genesis_data_dir = os.path.join(home_dir, 'el-cl-genesis-data/custom_config_data')
-    os.makedirs(genesis_data_dir, exist_ok=True)
-    
+    os.makedirs('/el-cl-genesis-data/custom_config_data', exist_ok=True)
     # Clean up existing directory if it exists
     if os.path.exists('/tmp/network_config'):
         shutil.rmtree('/tmp/network_config')
@@ -319,15 +314,13 @@ def download_endurance_config(url):
     subprocess.run(['chmod', '+x', './decompress.sh'])
     # Use bash explicitly to run the script
     subprocess.run(['bash', './decompress.sh'])
-    
-    # Copy files to user's directory
-    shutil.copy('besu.json', genesis_data_dir)
-    shutil.copy('genesis.ssz', genesis_data_dir)
-    shutil.copy('config.yaml', genesis_data_dir)
+    # shutil.copy('genesis.json', '/el-cl-genesis-data/custom_config_data/')
+    shutil.copy('besu.json', '/el-cl-genesis-data/custom_config_data/')
+    shutil.copy('genesis.ssz', '/el-cl-genesis-data/custom_config_data/')
+    shutil.copy('config.yaml', '/el-cl-genesis-data/custom_config_data/')
     shutil.rmtree('/tmp/network_config')
     # Restore original working directory
     os.chdir(original_dir)
-    print(f"Genesis configuration files have been saved to: {genesis_data_dir}")
 
     
 # Initialize sync urls for selected network
@@ -570,12 +563,10 @@ def download_and_install_besu():
         ##### BESU SERVICE FILE ###########
         besu_exec_flag = f''' --p2p-port={EL_P2P_PORT} --rpc-http-port={EL_RPC_PORT} --engine-rpc-port=8551 --max-peers={EL_MAX_PEER_COUNT} --metrics-enabled=true --metrics-port=6060 --rpc-http-enabled=true --sync-mode=SNAP --data-storage-format=BONSAI  --data-path=/var/lib/besu --engine-jwt-secret={JWTSECRET_PATH}'''
 
-        home_dir = os.path.expanduser('~')
-        genesis_data_dir = os.path.join(home_dir, 'el-cl-genesis-data/custom_config_data')
         if eth_network == 'endurance':
-            besu_exec_flag = f'''{besu_exec_flag} --network-id=648 --genesis-file={genesis_data_dir}/besu.json'''
+            besu_exec_flag = f'''{besu_exec_flag} --network-id=648 --genesis-file=/el-cl-genesis-data/custom_config_data/besu.json'''
         elif eth_network == 'endurance_devnet':
-            besu_exec_flag = f'{besu_exec_flag} --network-id=6480000002 --genesis-file={genesis_data_dir}/besu.json'
+            besu_exec_flag = f'{besu_exec_flag} --network-id=6480000002 --genesis-file=/el-cl-genesis-data/custom_config_data/besu.json'
         else:
             besu_exec_flag = f'{besu_exec_flag} --network={eth_network}'
         besu_service_file = f'''[Unit]
@@ -688,13 +679,11 @@ def install_teku():
             _feeparameters=f'--validators-proposer-default-fee-recipient={FEE_RECIPIENT_ADDRESS}'
         else:
             _feeparameters=''
-            
-        home_dir = os.path.expanduser('~')
-        genesis_data_dir = os.path.join(home_dir, 'el-cl-genesis-data/custom_config_data')
+
         if eth_network == 'endurance':
-            _network_params = f'--network={genesis_data_dir}/config.yaml --p2p-discovery-bootnodes={CL_BOOTNODES} --p2p-static-peers={CL_STATICPEERS} --checkpoint-sync-url={sync_url} --ignore-weak-subjectivity-period-enabled'
+            _network_params = f'--network=/el-cl-genesis-data/custom_config_data/config.yaml --p2p-discovery-bootnodes={CL_BOOTNODES} --p2p-static-peers={CL_STATICPEERS} --checkpoint-sync-url={sync_url} --ignore-weak-subjectivity-period-enabled'
         elif eth_network == 'endurance_devnet':
-            _network_params = f'--network={genesis_data_dir}/config.yaml --p2p-discovery-bootnodes={ENDURANCE_DEVNET_CL_BOOTNODES} --p2p-static-peers={ENDURANCE_DEVNET_CL_STATICPEERS} --checkpoint-sync-url={sync_url} --ignore-weak-subjectivity-period-enabled'
+            _network_params = f'--network=/el-cl-genesis-data/custom_config_data/config.yaml --p2p-discovery-bootnodes={ENDURANCE_DEVNET_CL_BOOTNODES} --p2p-static-peers={ENDURANCE_DEVNET_CL_STATICPEERS} --checkpoint-sync-url={sync_url} --ignore-weak-subjectivity-period-enabled'
         else:
             _network_params = f'--network={eth_network}'
 
