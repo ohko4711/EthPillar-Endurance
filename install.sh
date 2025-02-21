@@ -104,10 +104,10 @@ linux_install_installer() {
     git clone https://github.com/ohko4711/EthPillar-Endurance.git ~/git/ethpillar/ 2> /dev/null || (cd ~/git/ethpillar ; git fetch origin feat/devnet ; git checkout feat/devnet ; git pull)
     chmod +x ~/git/ethpillar/*.sh
     ohai "Installing ethpillar"
-    if [ -f /usr/local/bin/ethpillar ]; then 
-      sudo rm /usr/local/bin/ethpillar
+    if [ -e /usr/local/bin/ethpillar ]; then 
+      sudo rm -f /usr/local/bin/ethpillar
     fi
-    sudo ln -s ~/git/ethpillar/ethpillar.sh /usr/local/bin/ethpillar
+    sudo ln -sf ~/git/ethpillar/ethpillar.sh /usr/local/bin/ethpillar
     exit_on_error $?
 }
 
