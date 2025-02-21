@@ -314,10 +314,10 @@ def download_endurance_config(url):
     subprocess.run(['chmod', '+x', './decompress.sh'])
     # Use bash explicitly to run the script
     subprocess.run(['bash', './decompress.sh'])
-    # shutil.copy('genesis.json', '/el-cl-genesis-data/custom_config_data/')
-    shutil.copy('besu.json', '/el-cl-genesis-data/custom_config_data/')
-    shutil.copy('genesis.ssz', '/el-cl-genesis-data/custom_config_data/')
-    shutil.copy('config.yaml', '/el-cl-genesis-data/custom_config_data/')
+    # Use sudo to copy files
+    subprocess.run(['sudo', 'cp', 'besu.json', '/el-cl-genesis-data/custom_config_data/'])
+    subprocess.run(['sudo', 'cp', 'genesis.ssz', '/el-cl-genesis-data/custom_config_data/'])
+    subprocess.run(['sudo', 'cp', 'config.yaml', '/el-cl-genesis-data/custom_config_data/'])
     shutil.rmtree('/tmp/network_config')
     # Restore original working directory
     os.chdir(original_dir)
