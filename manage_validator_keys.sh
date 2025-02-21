@@ -117,11 +117,11 @@ function _getEthAddy(){
 
 function _getNetwork(){
     NETWORK=$(whiptail --title "Network" --menu \
-          "For which network are you generating validator keys?" 10 78 3 \
+          "For which network are you generating validator keys?" 12 90 4 \
           "mainnet" "Ethereum - Real ETH. Real staking rewards." \
           "holesky" "long term Testnet  - Suitable for staking practice." \
           "ephemery" "short term Testnet - Ideal for staking practice. Monthly resets." \
-          "endurance_devnet" "short term for Endurance Devnet - Ideal for staking practice. No rewards."
+          "endurance_devnet" "short term for Endurance Devnet - Ideal for staking practice. No rewards." \
           3>&1 1>&2 2>&3)
 }
 
@@ -409,6 +409,8 @@ function queryValidatorQueue(){
     BEACONCHAIN_URLS["mainnet"]="https://beaconcha.in"
     BEACONCHAIN_URLS["holesky"]="https://holesky.beaconcha.in"
     BEACONCHAIN_URLS["ephemery"]="https://beaconchain.ephemery.dev"
+    # TODO: temp use maninet https://beacon.fusionist.io//api/v1/validators/queue
+    BEACONCHAIN_URLS["endurance_devnet"]="https://beacon.fusionist.io"  
 
     # Dencun entry churn cap
     CHURN_ENTRY_PER_EPOCH=8

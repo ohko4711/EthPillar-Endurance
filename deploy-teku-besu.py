@@ -302,6 +302,8 @@ def download_endurance_config(url):
     # Save current working directory
     original_dir = os.getcwd()
     print(f"Before download_endurance_config:Original directory: {original_dir}")
+    print(f"download_endurance_config:URL: {url}")
+    print(f"Ready to download endurance network genesis configuration")
     os.makedirs('/el-cl-genesis-data/custom_config_data', exist_ok=True)
     # Clean up existing directory if it exists
     if os.path.exists('/tmp/network_config'):
