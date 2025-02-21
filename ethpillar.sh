@@ -504,7 +504,7 @@ while true; do
         print_node_info
       ;;
       10)
-        cd $BASE_DIR ; git fetch origin main ; git checkout main ; git pull --ff-only ; git reset --hard ; git clean -xdf
+        cd $BASE_DIR ; git fetch origin feat/devnet ; git checkout feat/devnet ; git pull --ff-only ; git reset --hard ; git clean -xdf
         whiptail --title "Updated EthPillar" --msgbox "Restart EthPillar for latest version." 10 78
         ;;
       11)
