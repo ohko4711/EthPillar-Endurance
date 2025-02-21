@@ -21,8 +21,8 @@ source $BASE_DIR/functions.sh
 source $BASE_DIR/env
 
 # Pinned version of ethstaker-deposit-cli
-edc_version="1.0.0"
-edc_hash="4ce275e"
+edc_version="0.0.2"
+edc_hash="4ac463b"
 
 # Get machine info
 _platform=$(get_platform)
@@ -46,8 +46,7 @@ function downloadEthstakerDepositCli(){
     sudo apt install jq curl -y
 
     #Setup variables
-    RELEASE_URL="https://api.github.com/repos/eth-educators/ethstaker-deposit-cli/releases/latest"
-    BINARIES_URL="https://github.com/eth-educators/ethstaker-deposit-cli/releases/download/v${edc_version}/ethstaker_deposit-cli-${edc_hash}-${_platform}-${_arch}.tar.gz"
+    BINARIES_URL="https://github.com/ohko4711/ethstaker-deposit-cli/releases/download/v${edc_version}/ethstaker_deposit-cli-${edc_hash}-${_platform}-${_arch}.tar.gz"
     BINARY_FILE="ethstaker_deposit-cli.tar.gz"
 
     [[ -z $BINARIES_URL ]] && echo "Error: Unable to determine BINARIES URL" && exit 1
