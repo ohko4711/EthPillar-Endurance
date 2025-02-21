@@ -236,7 +236,10 @@ function setConfig(){
           ;;
           endurance_devnet)
             LAUNCHPAD_URL="https://staking.fusionist.io/en/"
-            # TODO: 
+            LAUNCHPAD_URL_LIDO=""  # No Lido support for endurance devnet
+            CSM_FEE_RECIPIENT_ADDRESS=""  # No CSM support for endurance devnet
+            CSM_WITHDRAWAL_ADDRESS=""  # No CSM support for endurance devnet
+            CSM_SENTINEL_URL=""  # No CSM sentinel for endurance devnet
             FAUCET=""
             HOMEPAGE="https://www.fusionist.io/"
             # TODO: config beaconcha.in for endurance devnet solv bigtabel issues
