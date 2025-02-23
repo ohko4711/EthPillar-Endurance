@@ -544,13 +544,13 @@ def download_and_install_nethermind():
         os.remove(temp_path)
 
         ##### NETHERMIND SERVICE FILE ###########
-        nethermind_exec_flag = '--datadir="/var/lib/nethermind" --Network.DiscoveryPort {EL_P2P_PORT} --Network.P2PPort {EL_P2P_PORT} --Network.MaxActivePeers {EL_MAX_PEER_COUNT} --JsonRpc.Port {EL_RPC_PORT} --Metrics.Enabled true --Metrics.ExposePort 6060 --JsonRpc.JwtSecretFile {JWTSECRET_PATH} --Pruning.Mode=Hybrid --Pruning.FullPruningTrigger=VolumeFreeSpace --Pruning.FullPruningThresholdMb=300000'
+        nethermind_exec_flag = '--data-dir=/var/lib/nethermind --Network.DiscoveryPort={EL_P2P_PORT} --Network.P2PPort={EL_P2P_PORT} --Network.MaxActivePeers={EL_MAX_PEER_COUNT} --JsonRpc.Port={EL_RPC_PORT} --Metrics.Enabled=true --Metrics.ExposePort=6060 --JsonRpc.JwtSecretFile={JWTSECRET_PATH} --Pruning.Mode=Hybrid --Pruning.FullPruningTrigger=VolumeFreeSpace --Pruning.FullPruningThresholdMb=300000'
         if eth_network == 'endurance':
             nethermind_exec_flag = f'{nethermind_exec_flag} --Init.ChainSpecPath=/el-cl-genesis-data/custom_config_data/chainspec.json'
         elif eth_network == 'endurance_devnet':
             nethermind_exec_flag = f'{nethermind_exec_flag} --Init.ChainSpecPath=/el-cl-genesis-data/custom_config_data/chainspec.json'
         else:
-            nethermind_exec_flag = f'{nethermind_exec_flag} --config {eth_network}'
+            nethermind_exec_flag = f'{nethermind_exec_flag} --config={eth_network}'
         nethermind_service_file = f'''[Unit]
 Description=Nethermind Execution Layer Client service for {eth_network.upper()}
 After=network-online.target
