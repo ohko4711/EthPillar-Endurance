@@ -690,22 +690,15 @@ def install_nimbus():
         if eth_network == 'endurance':
             _network_params = f'--network=/el-cl-genesis-data/custom_config_data --bootstrap-node={CL_BOOTNODES} --direct-peer={CL_STATICPEERS} --trusted-state-root=TODO: --external-beacon-api-url={sync_url}'
         elif eth_network == 'endurance_devnet':
-            _direct_peers = [
-                "/ip4/88.99.94.109/tcp/13000/p2p/16Uiu2HAmJSHiNh5Q6iGHQzgvbYrWgbj7q72mVFKvLyDnEstT9VqJ",
-                "/ip4/192.168.144.3/tcp/13000/p2p/16Uiu2HAmJSHiNh5Q6iGHQzgvbYrWgbj7q72mVFKvLyDnEstT9VqJ",
-                "/ip4/88.99.94.109/tcp/13000/p2p/16Uiu2HAmJSHiNh5Q6iGHQzgvbYrWgbj7q72mVFKvLyDnEstT9VqJ",
-                "/ip4/78.46.91.61/tcp/13000/p2p/16Uiu2HAmFktvcYffS28trWjiMeHDKnBwJM99bQCF4bcHVGv72J9b",
-                "/ip4/192.168.0.3/tcp/13000/p2p/16Uiu2HAmFktvcYffS28trWjiMeHDKnBwJM99bQCF4bcHVGv72J9b",
-                "/ip4/78.46.91.61/tcp/13000/p2p/16Uiu2HAmFktvcYffS28trWjiMeHDKnBwJM99bQCF4bcHVGv72J9b",
-                "/ip4/168.119.5.82/tcp/10000/p2p/16Uiu2HAmJTUH6sBdRSDtbiLGm8hMQz4d3EzJnWqUYW9bt4NAu71H",
-                "/ip4/116.202.172.145/tcp/10000/p2p/16Uiu2HAkwsTQC4v5PnuM1SxqdHnvp8Vg3gE9bGbHCkoqMH3oTAev",
-                "/ip4/95.217.233.186/tcp/13000/p2p/16Uiu2HAmC3YxPToFDMHuWf2E488MLv9SUPYCUNKP35M8wjmKUzEo",
-                "/ip4/172.19.0.3/tcp/13000/p2p/16Uiu2HAmC3YxPToFDMHuWf2E488MLv9SUPYCUNKP35M8wjmKUzEo",
-                "/ip4/95.217.233.186/tcp/13000/p2p/16Uiu2HAmC3YxPToFDMHuWf2E488MLv9SUPYCUNKP35M8wjmKUzEo",
-                "/ip4/192.168.128.4/tcp/11300/p2p/16Uiu2HAm5LJUbs2qVHvkqqrB6ME6c5CEGohHSH8ehyYPEHsMbKHA"
-            ]
-            _direct_peers_str = " ".join([f"--direct-peer={peer}" for peer in _direct_peers])
-            _network_params = f'--network=/el-cl-genesis-data/custom_config_data --bootstrap-node={ENDURANCE_DEVNET_CL_BOOTNODES} {_direct_peers_str} --trusted-state-root=0x019b62ee2b77af1be1c74b84206a7e7d4ec5131d7c62efe5ab620b402c9a0a21 --external-beacon-api-url={sync_url}'
+            # Split ENDURANCE_DEVNET_CL_BOOTNODES into a list of enodes
+            el_bootnodes = ENDURANCE_DEVNET_CL_BOOTNODES.split(',')
+            bootstrap_nodes = ' '.join([f'--bootstrap-node={enode}' for enode in el_bootnodes])
+            
+            direct_peers = ENDURANCE_DEVNET_CL_STATICPEERS.split(',')
+            direct_peers_str = " ".join([f"--direct-peer={peer}" for peer in direct_peers])
+            
+            # Update _network_params with the new bootstrap nodes
+            _network_params = f'--network=/el-cl-genesis-data/custom_config_data {bootstrap_nodes} {direct_peers_str} --trusted-state-root=0x019b62ee2b77af1be1c74b84206a7e7d4ec5131d7c62efe5ab620b402c9a0a21 --external-beacon-api-url={sync_url}'
         else:
             _network_params = f'--network={eth_network}'
 
