@@ -550,7 +550,7 @@ def download_and_install_nethermind():
         os.remove(temp_path)
 
         ##### NETHERMIND SERVICE FILE ###########
-        nethermind_exec_flag = f'''--log=INFO --Sync.SnapSync=true --JsonRpc.EngineHost=0.0.0.0 --JsonRpc.EnginePort=8551 --data-dir=/var/lib/nethermind --Network.DiscoveryPort={EL_P2P_PORT} --Network.P2PPort={EL_P2P_PORT} --Network.MaxActivePeers={EL_MAX_PEER_COUNT} --JsonRpc.Port={EL_RPC_PORT} --Metrics.Enabled=true --Metrics.ExposePort=6060 --JsonRpc.JwtSecretFile={JWTSECRET_PATH} --Pruning.Mode=Hybrid --Pruning.FullPruningTrigger=VolumeFreeSpace --Pruning.FullPruningThresholdMb=300000'''
+        nethermind_exec_flag = f'''--log=INFO --Sync.SnapSync=true --JsonRpc.Enabled=true --JsonRpc.EnabledModules=net,eth,consensus,subscribe,web3,admin --JsonRpc.EngineHost=0.0.0.0 --JsonRpc.EnginePort=8551 --data-dir=/var/lib/nethermind --Network.DiscoveryPort={EL_P2P_PORT} --Network.P2PPort={EL_P2P_PORT} --Network.MaxActivePeers={EL_MAX_PEER_COUNT} --JsonRpc.Port={EL_RPC_PORT} --Metrics.Enabled=true --Metrics.ExposePort=6060 --JsonRpc.JwtSecretFile={JWTSECRET_PATH} --Pruning.Mode=Hybrid --Pruning.FullPruningTrigger=VolumeFreeSpace --Pruning.FullPruningThresholdMb=300000'''
         
         if eth_network == 'endurance':
             nethermind_exec_flag = f'{nethermind_exec_flag} --Network.StaticPeers={EL_BOOTNODES} --config=none --Init.ChainSpecPath=/el-cl-genesis-data/custom_config_data/chainspec.json'
