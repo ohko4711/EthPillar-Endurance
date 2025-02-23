@@ -5,7 +5,7 @@
 # Validator-Install: Standalone Nimbus BN + Standalone Nimbus VC + Nethermind EL + MEVboost
 # Quickstart :: Minority Client :: Docker-free
 #
-# Made for home and solo stakers 🏠🥩
+# Made for home and solo stakers 
 #
 # Acknowledgments
 # Validator-Install is branched from validator-install written by Accidental-green: https://github.com/accidental-green/validator-install
@@ -69,6 +69,7 @@ CL_BOOTNODES=os.getenv('CL_BOOTNODES')
 ENDURANCE_DEVNET_CL_STATICPEERS=os.getenv('ENDURANCE_DEVNET_CL_STATICPEERS')
 ENDURANCE_DEVNET_CL_TRUSTPEERS=os.getenv('ENDURANCE_DEVNET_CL_TRUSTPEERS')
 ENDURANCE_DEVNET_CL_BOOTNODES=os.getenv('ENDURANCE_DEVNET_CL_BOOTNODES')
+ENDURANCE_DEVNET_EL_BOOTNODES=os.getenv('ENDURANCE_DEVNET_EL_BOOTNODES')
 
 JWTSECRET_PATH=os.getenv('JWTSECRET_PATH')
 GRAFFITI=os.getenv('GRAFFITI')
@@ -305,6 +306,11 @@ def download_endurance_config(url):
     subprocess.run(['sudo', 'cp', 'chainspec.json', '/el-cl-genesis-data/custom_config_data/'])
     subprocess.run(['sudo', 'cp', 'genesis.ssz', '/el-cl-genesis-data/custom_config_data/'])
     subprocess.run(['sudo', 'cp', 'config.yaml', '/el-cl-genesis-data/custom_config_data/'])
+    subprocess.run(['sudo', 'cp', 'deploy_block.txt', '/el-cl-genesis-data/custom_config_data/'])
+    subprocess.run(['sudo', 'cp', 'deposit_contract.txt', '/el-cl-genesis-data/custom_config_data/'])
+    subprocess.run(['sudo', 'cp', 'deposit_contract_block.txt', '/el-cl-genesis-data/custom_config_data/'])
+    subprocess.run(['sudo', 'cp', 'deposit_contract_block_hash.txt', '/el-cl-genesis-data/custom_config_data/'])
+    
     shutil.rmtree('/tmp/network_config')
     # Restore original working directory
     os.chdir(original_dir)
@@ -320,7 +326,7 @@ elif eth_network == "sepolia":
 elif eth_network == "endurance":
     sync_urls = endurance_sync_urls
 elif eth_network == "endurance_devnet":
-    download_endurance_config("https://github.com/OpenFusionist/devnet_network_config")
+    # download_endurance_config("https://github.com/OpenFusionist/devnet_network_config")
     sync_urls = endurance_devnet_sync_urls
 
 # Use a random sync url
@@ -544,11 +550,12 @@ def download_and_install_nethermind():
         os.remove(temp_path)
 
         ##### NETHERMIND SERVICE FILE ###########
-        nethermind_exec_flag = '--log=INFO --data-dir=/var/lib/nethermind --Network.DiscoveryPort={EL_P2P_PORT} --Network.P2PPort={EL_P2P_PORT} --Network.MaxActivePeers={EL_MAX_PEER_COUNT} --JsonRpc.Port={EL_RPC_PORT} --Metrics.Enabled=true --Metrics.ExposePort=6060 --JsonRpc.JwtSecretFile={JWTSECRET_PATH} --Pruning.Mode=Hybrid --Pruning.FullPruningTrigger=VolumeFreeSpace --Pruning.FullPruningThresholdMb=300000'
+        nethermind_exec_flag = f'''--log=INFO --JsonRpc.EngineHost=0.0.0.0 --JsonRpc.EnginePort=8551 --data-dir=/var/lib/nethermind --Network.DiscoveryPort={EL_P2P_PORT} --Network.P2PPort={EL_P2P_PORT} --Network.MaxActivePeers={EL_MAX_PEER_COUNT} --JsonRpc.Port={EL_RPC_PORT} --Metrics.Enabled=true --Metrics.ExposePort=6060 --JsonRpc.JwtSecretFile={JWTSECRET_PATH} --Pruning.Mode=Hybrid --Pruning.FullPruningTrigger=VolumeFreeSpace --Pruning.FullPruningThresholdMb=300000'''
+        
         if eth_network == 'endurance':
-            nethermind_exec_flag = f'{nethermind_exec_flag} --Init.ChainSpecPath=/el-cl-genesis-data/custom_config_data/chainspec.json'
+            nethermind_exec_flag = f'{nethermind_exec_flag} --Network.StaticPeers={EL_BOOTNODES} --config=none --Init.ChainSpecPath=/el-cl-genesis-data/custom_config_data/chainspec.json'
         elif eth_network == 'endurance_devnet':
-            nethermind_exec_flag = f'{nethermind_exec_flag} --Init.ChainSpecPath=/el-cl-genesis-data/custom_config_data/chainspec.json'
+            nethermind_exec_flag = f'{nethermind_exec_flag} --Network.StaticPeers={ENDURANCE_DEVNET_EL_BOOTNODES} --config=none --Init.ChainSpecPath=/el-cl-genesis-data/custom_config_data/chainspec.json'
         else:
             nethermind_exec_flag = f'{nethermind_exec_flag} --config={eth_network}'
         nethermind_service_file = f'''[Unit]
@@ -681,9 +688,24 @@ def install_nimbus():
 
         # Network specific parameters
         if eth_network == 'endurance':
-            _network_params = f'--network=/el-cl-genesis-data/custom_config_data/config.yaml --bootstrap-node={CL_BOOTNODES} --direct-peer={CL_STATICPEERS} --external-beacon-api-url={sync_url}'
+            _network_params = f'--network=/el-cl-genesis-data/custom_config_data --bootstrap-node={CL_BOOTNODES} --direct-peer={CL_STATICPEERS} --trusted-state-root=TODO: --external-beacon-api-url={sync_url}'
         elif eth_network == 'endurance_devnet':
-            _network_params = f'--network=/el-cl-genesis-data/custom_config_data/config.yaml --bootstrap-node={ENDURANCE_DEVNET_CL_BOOTNODES} --direct-peer={ENDURANCE_DEVNET_CL_STATICPEERS} --external-beacon-api-url={sync_url}'
+            _direct_peers = [
+                "/ip4/88.99.94.109/tcp/13000/p2p/16Uiu2HAmJSHiNh5Q6iGHQzgvbYrWgbj7q72mVFKvLyDnEstT9VqJ",
+                "/ip4/192.168.144.3/tcp/13000/p2p/16Uiu2HAmJSHiNh5Q6iGHQzgvbYrWgbj7q72mVFKvLyDnEstT9VqJ",
+                "/ip4/88.99.94.109/tcp/13000/p2p/16Uiu2HAmJSHiNh5Q6iGHQzgvbYrWgbj7q72mVFKvLyDnEstT9VqJ",
+                "/ip4/78.46.91.61/tcp/13000/p2p/16Uiu2HAmFktvcYffS28trWjiMeHDKnBwJM99bQCF4bcHVGv72J9b",
+                "/ip4/192.168.0.3/tcp/13000/p2p/16Uiu2HAmFktvcYffS28trWjiMeHDKnBwJM99bQCF4bcHVGv72J9b",
+                "/ip4/78.46.91.61/tcp/13000/p2p/16Uiu2HAmFktvcYffS28trWjiMeHDKnBwJM99bQCF4bcHVGv72J9b",
+                "/ip4/168.119.5.82/tcp/10000/p2p/16Uiu2HAmJTUH6sBdRSDtbiLGm8hMQz4d3EzJnWqUYW9bt4NAu71H",
+                "/ip4/116.202.172.145/tcp/10000/p2p/16Uiu2HAkwsTQC4v5PnuM1SxqdHnvp8Vg3gE9bGbHCkoqMH3oTAev",
+                "/ip4/95.217.233.186/tcp/13000/p2p/16Uiu2HAmC3YxPToFDMHuWf2E488MLv9SUPYCUNKP35M8wjmKUzEo",
+                "/ip4/172.19.0.3/tcp/13000/p2p/16Uiu2HAmC3YxPToFDMHuWf2E488MLv9SUPYCUNKP35M8wjmKUzEo",
+                "/ip4/95.217.233.186/tcp/13000/p2p/16Uiu2HAmC3YxPToFDMHuWf2E488MLv9SUPYCUNKP35M8wjmKUzEo",
+                "/ip4/192.168.128.4/tcp/11300/p2p/16Uiu2HAm5LJUbs2qVHvkqqrB6ME6c5CEGohHSH8ehyYPEHsMbKHA"
+            ]
+            _direct_peers_str = " ".join([f"--direct-peer={peer}" for peer in _direct_peers])
+            _network_params = f'--network=/el-cl-genesis-data/custom_config_data --bootstrap-node={ENDURANCE_DEVNET_CL_BOOTNODES} {_direct_peers_str} --trusted-state-root=0x019b62ee2b77af1be1c74b84206a7e7d4ec5131d7c62efe5ab620b402c9a0a21 --external-beacon-api-url={sync_url}'
         else:
             _network_params = f'--network={eth_network}'
 
