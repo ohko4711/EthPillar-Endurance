@@ -43,7 +43,7 @@ def clear_screen():
 clear_screen()  # Call the function to clear the screen
 
 # Valid configurations
-valid_networks = ['MAINNET', 'HOLESKY', 'SEPOLIA']
+valid_networks = ['MAINNET', 'HOLESKY', 'SEPOLIA', 'ENDURANCE', 'ENDURANCE_DEVNET']
 valid_exec_clients = ['NETHERMIND']
 valid_consensus_clients = ['NIMBUS']
 valid_install_configs = ['Solo Staking Node', 'Full Node Only', 'Lido CSM Staking Node', 'Lido CSM Validator Client Only' ,'Validator Client Only', 'Failover Staking Node']
@@ -59,6 +59,17 @@ CL_P2P_PORT=os.getenv('CL_P2P_PORT')
 CL_REST_PORT=os.getenv('CL_REST_PORT')
 CL_MAX_PEER_COUNT=os.getenv('CL_MAX_PEER_COUNT')
 CL_IP_ADDRESS=os.getenv('CL_IP_ADDRESS')
+
+# Endurance Mainnet
+CL_TRUSTPEERS=os.getenv('CL_TRUSTPEERS')
+CL_STATICPEERS=os.getenv('CL_STATICPEERS')
+CL_BOOTNODES=os.getenv('CL_BOOTNODES')
+
+# Endurance Devnet
+ENDURANCE_DEVNET_CL_STATICPEERS=os.getenv('ENDURANCE_DEVNET_CL_STATICPEERS')
+ENDURANCE_DEVNET_CL_TRUSTPEERS=os.getenv('ENDURANCE_DEVNET_CL_TRUSTPEERS')
+ENDURANCE_DEVNET_CL_BOOTNODES=os.getenv('ENDURANCE_DEVNET_CL_BOOTNODES')
+
 JWTSECRET_PATH=os.getenv('JWTSECRET_PATH')
 GRAFFITI=os.getenv('GRAFFITI')
 FEE_RECIPIENT_ADDRESS=os.getenv('FEE_RECIPIENT_ADDRESS')
@@ -118,7 +129,7 @@ if not args.network and not args.skip_prompts:
     index = SelectionMenu.get_selection(valid_networks,title='Validator Install Quickstart :: CoinCashew.com',subtitle='Installs Nethermind EL / Nimbus BN / Nimbus VC / MEVboost\nSelect Ethereum network:')
 
     # Exit selected
-    if index == 3:
+    if index == 5:
         exit(0)
 
     # Set network
@@ -230,7 +241,6 @@ if not NODE_ONLY and FEE_RECIPIENT_ADDRESS == "" and not args.skip_prompts:
         else:
             print("Invalid Ethereum address. Try again.")
 
-
 # Validates an CL beacon node address with port
 def validate_beacon_node_address(ip_port):
     pattern = r"^(http|https|ws):\/\/((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)(:?\d{1,5})?$"
@@ -273,7 +283,33 @@ if not args.skip_prompts:
         file_name = os.path.basename(sys.argv[0])
         print(f'\nInstall cancelled by user. \n\nWhen ready, re-run install command:\npython3 {file_name}')
         exit(0)
-
+        
+        
+def download_endurance_config(url):
+    # Save current working directory
+    original_dir = os.getcwd()
+    print(f"Before download_endurance_config:Original directory: {original_dir}")
+    print(f"download_endurance_config:URL: {url}")
+    print(f"Ready to download endurance network genesis configuration")
+    os.makedirs('/el-cl-genesis-data/custom_config_data', exist_ok=True)
+    # Clean up existing directory if it exists
+    if os.path.exists('/tmp/network_config'):
+        shutil.rmtree('/tmp/network_config')
+    subprocess.run(['git', 'clone', url, '/tmp/network_config'])
+    os.chdir('/tmp/network_config')
+    # Add execute permissions to decompress.sh
+    subprocess.run(['chmod', '+x', './decompress.sh'])
+    # Use bash explicitly to run the script
+    subprocess.run(['bash', './decompress.sh'])
+    # Use sudo to copy files
+    subprocess.run(['sudo', 'cp', 'chainspec.json', '/el-cl-genesis-data/custom_config_data/'])
+    subprocess.run(['sudo', 'cp', 'genesis.ssz', '/el-cl-genesis-data/custom_config_data/'])
+    subprocess.run(['sudo', 'cp', 'config.yaml', '/el-cl-genesis-data/custom_config_data/'])
+    shutil.rmtree('/tmp/network_config')
+    # Restore original working directory
+    os.chdir(original_dir)
+    
+    
 # Initialize sync urls for selected network
 if eth_network == "mainnet":
     sync_urls = mainnet_sync_urls
@@ -281,9 +317,16 @@ elif eth_network == "holesky":
     sync_urls = holesky_sync_urls
 elif eth_network == "sepolia":
     sync_urls = sepolia_sync_urls
+elif eth_network == "endurance":
+    sync_urls = endurance_sync_urls
+elif eth_network == "endurance_devnet":
+    download_endurance_config("https://github.com/OpenFusionist/devnet_network_config")
+    sync_urls = endurance_devnet_sync_urls
 
 # Use a random sync url
 sync_url = random.choice(sync_urls)[1]
+
+
 
 def setup_node():
     if not VALIDATOR_ONLY:
@@ -377,18 +420,28 @@ def install_mevboost():
         'Type=simple',
         'Restart=always',
         'RestartSec=5',
-        'ExecStart=/usr/local/bin/mev-boost \\',
-        f'    -{eth_network} \\',
-        f'    -min-bid {MEV_MIN_BID} \\',
-        '    -relay-check \\',
+        'ExecStart=/usr/local/bin/mev-boost -relay-check\\'
         ]
 
-        if eth_network == 'mainnet':
-            relay_options=mainnet_relay_options
-        elif eth_network == 'holesky':
-            relay_options=holesky_relay_options
+        # Add custom endurance network parameters
+        if eth_network == 'endurance_devnet':
+            mev_boost_service_file_lines.extend([
+                '    -genesis-fork-version 0x10000001 \\',
+                '    -genesis-timestamp 1705568400 \\'
+            ])
         else:
-            relay_options=sepolia_relay_options
+            # Standard network configuration
+            mev_boost_service_file_lines.extend([
+                f'    -{eth_network} \\'
+            ])
+            
+        # Add network-specific relay options
+        relay_options = {
+            'mainnet': mainnet_relay_options,
+            'holesky': holesky_relay_options,
+            'sepolia': sepolia_relay_options,
+            'endurance_devnet': endurance_devnet_relay_options
+        }.get(eth_network, sepolia_relay_options)
 
         for relay in relay_options:
             relay_line = f'    -relay {relay["url"]} \\'
@@ -491,6 +544,13 @@ def download_and_install_nethermind():
         os.remove(temp_path)
 
         ##### NETHERMIND SERVICE FILE ###########
+        nethermind_exec_flag = '--datadir="/var/lib/nethermind" --Network.DiscoveryPort {EL_P2P_PORT} --Network.P2PPort {EL_P2P_PORT} --Network.MaxActivePeers {EL_MAX_PEER_COUNT} --JsonRpc.Port {EL_RPC_PORT} --Metrics.Enabled true --Metrics.ExposePort 6060 --JsonRpc.JwtSecretFile {JWTSECRET_PATH} --Pruning.Mode=Hybrid --Pruning.FullPruningTrigger=VolumeFreeSpace --Pruning.FullPruningThresholdMb=300000'
+        if eth_network == 'endurance':
+            nethermind_exec_flag = f'{nethermind_exec_flag} --Init.ChainSpecPath=/el-cl-genesis-data/custom_config_data/chainspec.json'
+        elif eth_network == 'endurance_devnet':
+            nethermind_exec_flag = f'{nethermind_exec_flag} --Init.ChainSpecPath=/el-cl-genesis-data/custom_config_data/chainspec.json'
+        else:
+            nethermind_exec_flag = f'{nethermind_exec_flag} --config {eth_network}'
         nethermind_service_file = f'''[Unit]
 Description=Nethermind Execution Layer Client service for {eth_network.upper()}
 After=network-online.target
@@ -507,7 +567,7 @@ KillSignal=SIGINT
 TimeoutStopSec=900
 WorkingDirectory=/var/lib/nethermind
 Environment="DOTNET_BUNDLE_EXTRACT_BASE_DIR=/var/lib/nethermind"
-ExecStart=/usr/local/bin/nethermind/nethermind --config {eth_network} --datadir="/var/lib/nethermind" --Network.DiscoveryPort {EL_P2P_PORT} --Network.P2PPort {EL_P2P_PORT} --Network.MaxActivePeers {EL_MAX_PEER_COUNT} --JsonRpc.Port {EL_RPC_PORT} --Metrics.Enabled true --Metrics.ExposePort 6060 --JsonRpc.JwtSecretFile {JWTSECRET_PATH} --Pruning.Mode=Hybrid --Pruning.FullPruningTrigger=VolumeFreeSpace --Pruning.FullPruningThresholdMb=300000
+ExecStart=/usr/local/bin/nethermind/nethermind {nethermind_exec_flag}
 
 [Install]
 WantedBy=multi-user.target
@@ -619,6 +679,14 @@ def install_nimbus():
         else:
             _feeparameters=''
 
+        # Network specific parameters
+        if eth_network == 'endurance':
+            _network_params = f'--network=/el-cl-genesis-data/custom_config_data/config.yaml --bootstrap-node={CL_BOOTNODES} --direct-peer={CL_STATICPEERS} --external-beacon-api-url={sync_url}'
+        elif eth_network == 'endurance_devnet':
+            _network_params = f'--network=/el-cl-genesis-data/custom_config_data/config.yaml --bootstrap-node={ENDURANCE_DEVNET_CL_BOOTNODES} --direct-peer={ENDURANCE_DEVNET_CL_STATICPEERS} --external-beacon-api-url={sync_url}'
+        else:
+            _network_params = f'--network={eth_network}'
+
         ########### NIMBUS SERVICE FILE #############
         nimbus_service_file = f'''[Unit]
 Description=Nimbus Beacon Node Consensus Client service for {eth_network.upper()}
@@ -634,7 +702,7 @@ Restart=on-failure
 RestartSec=3
 KillSignal=SIGINT
 TimeoutStopSec=900
-ExecStart=/usr/local/bin/nimbus_beacon_node --network={eth_network} --data-dir=/var/lib/nimbus --tcp-port={CL_P2P_PORT} --udp-port={CL_P2P_PORT} --max-peers={CL_MAX_PEER_COUNT} --rest-port={CL_REST_PORT} --enr-auto-update=true --web3-url=http://127.0.0.1:8551 --rest --metrics --metrics-port=8008 --jwt-secret={JWTSECRET_PATH} --non-interactive --status-bar=false --in-process-validators=false {_feeparameters} {_mevparameters}
+ExecStart=/usr/local/bin/nimbus_beacon_node {_network_params} --data-dir=/var/lib/nimbus --tcp-port={CL_P2P_PORT} --udp-port={CL_P2P_PORT} --max-peers={CL_MAX_PEER_COUNT} --rest-port={CL_REST_PORT} --enr-auto-update=true --web3-url=http://127.0.0.1:8551 --rest --metrics --metrics-port=8008 --jwt-secret={JWTSECRET_PATH} --non-interactive --status-bar=false --in-process-validators=false {_feeparameters} {_mevparameters}
 
 [Install]
 WantedBy=multi-user.target
