@@ -550,7 +550,7 @@ def download_and_install_nethermind():
         os.remove(temp_path)
 
         ##### NETHERMIND SERVICE FILE ###########
-        nethermind_exec_flag = f'''--log=INFO --JsonRpc.EngineHost=0.0.0.0 --JsonRpc.EnginePort=8551 --data-dir=/var/lib/nethermind --Network.DiscoveryPort={EL_P2P_PORT} --Network.P2PPort={EL_P2P_PORT} --Network.MaxActivePeers={EL_MAX_PEER_COUNT} --JsonRpc.Port={EL_RPC_PORT} --Metrics.Enabled=true --Metrics.ExposePort=6060 --JsonRpc.JwtSecretFile={JWTSECRET_PATH} --Pruning.Mode=Hybrid --Pruning.FullPruningTrigger=VolumeFreeSpace --Pruning.FullPruningThresholdMb=300000'''
+        nethermind_exec_flag = f'''--log=INFO --Sync.SnapSync=true --JsonRpc.EngineHost=0.0.0.0 --JsonRpc.EnginePort=8551 --data-dir=/var/lib/nethermind --Network.DiscoveryPort={EL_P2P_PORT} --Network.P2PPort={EL_P2P_PORT} --Network.MaxActivePeers={EL_MAX_PEER_COUNT} --JsonRpc.Port={EL_RPC_PORT} --Metrics.Enabled=true --Metrics.ExposePort=6060 --JsonRpc.JwtSecretFile={JWTSECRET_PATH} --Pruning.Mode=Hybrid --Pruning.FullPruningTrigger=VolumeFreeSpace --Pruning.FullPruningThresholdMb=300000'''
         
         if eth_network == 'endurance':
             nethermind_exec_flag = f'{nethermind_exec_flag} --Network.StaticPeers={EL_BOOTNODES} --config=none --Init.ChainSpecPath=/el-cl-genesis-data/custom_config_data/chainspec.json'
@@ -698,7 +698,7 @@ def install_nimbus():
             direct_peers_str = " ".join([f"--direct-peer={peer}" for peer in direct_peers])
             
             # Update _network_params with the new bootstrap nodes
-            _network_params = f'--network=/el-cl-genesis-data/custom_config_data {bootstrap_nodes} {direct_peers_str} --trusted-state-root=0x019b62ee2b77af1be1c74b84206a7e7d4ec5131d7c62efe5ab620b402c9a0a21 --external-beacon-api-url={sync_url}'
+            _network_params = f'--network=/el-cl-genesis-data/custom_config_data {bootstrap_nodes} {direct_peers_str} --trusted-state-root=0x0a66edf75765b9d2d7c08f3f294c61172490b49bad1134afd16f4872bf51d394 --external-beacon-api-url={sync_url}'
         else:
             _network_params = f'--network={eth_network}'
 
@@ -733,6 +733,9 @@ WantedBy=multi-user.target
         os.remove(nimbus_temp_file)
 
 def run_nimbus_checkpoint_sync():
+    if eth_network == 'endurance' or eth_network == 'endurance_devnet':
+        print(f'for custom network, already integrated trustedNodeSync in command')
+        return
     if sync_url is not None and not VALIDATOR_ONLY:
         print(f'>> Running Checkpoint Sync. Using Sync URL: {sync_url}')
         db_path = "/var/lib/nimbus/db"
