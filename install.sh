@@ -101,7 +101,7 @@ linux_install_pre() {
 linux_install_installer() {
     ohai "Cloning ethpillar into ~/git/ethpillar"
     mkdir -p ~/git/ethpillar
-    git clone https://github.com/ohko4711/EthPillar-Endurance.git ~/git/ethpillar/ 2> /dev/null || (cd ~/git/ethpillar ; git fetch origin feat/devnet ; git checkout feat/devnet ; git pull)
+    git clone -b feat/devnet https://github.com/ohko4711/EthPillar-Endurance.git ~/git/ethpillar/ 2> /dev/null || (cd ~/git/ethpillar && git fetch origin feat/devnet && git checkout feat/devnet && git pull)
     chmod +x ~/git/ethpillar/*.sh
     ohai "Installing ethpillar"
     if [ -e /usr/local/bin/ethpillar ]; then 
