@@ -292,7 +292,7 @@ def download_endurance_config(url):
     print(f"Before download_endurance_config:Original directory: {original_dir}")
     print(f"download_endurance_config:URL: {url}")
     print(f"Ready to download endurance network genesis configuration")
-    subprocess.run(['sudo', 'mkdir', '-p', '/el-cl-genesis-data/custom_config_data'], check=True)
+    subprocess.run(['sudo', 'mkdir', '-p', '/opt/ethpillar/el-cl-genesis-data'], check=True)
     # Clean up existing directory if it exists
     if os.path.exists('/tmp/network_config'):
         shutil.rmtree('/tmp/network_config')
@@ -303,13 +303,14 @@ def download_endurance_config(url):
     # Use bash explicitly to run the script
     subprocess.run(['bash', './decompress.sh'])
     # Use sudo to copy files
-    subprocess.run(['sudo', 'cp', 'chainspec.json', '/el-cl-genesis-data/custom_config_data/'])
-    subprocess.run(['sudo', 'cp', 'genesis.ssz', '/el-cl-genesis-data/custom_config_data/'])
-    subprocess.run(['sudo', 'cp', 'config.yaml', '/el-cl-genesis-data/custom_config_data/'])
-    subprocess.run(['sudo', 'cp', 'deploy_block.txt', '/el-cl-genesis-data/custom_config_data/'])
-    subprocess.run(['sudo', 'cp', 'deposit_contract.txt', '/el-cl-genesis-data/custom_config_data/'])
-    subprocess.run(['sudo', 'cp', 'deposit_contract_block.txt', '/el-cl-genesis-data/custom_config_data/'])
-    subprocess.run(['sudo', 'cp', 'deposit_contract_block_hash.txt', '/el-cl-genesis-data/custom_config_data/'])
+    print(f'copy custom genesis file to /opt/ethpillar/el-cl-genesis-data')
+    subprocess.run(['sudo', 'cp', 'chainspec.json', '/opt/ethpillar/el-cl-genesis-data/'])
+    subprocess.run(['sudo', 'cp', 'genesis.ssz', '/opt/ethpillar/el-cl-genesis-data/'])
+    subprocess.run(['sudo', 'cp', 'config.yaml', '/opt/ethpillar/el-cl-genesis-data/'])
+    subprocess.run(['sudo', 'cp', 'deploy_block.txt', '/opt/ethpillar/el-cl-genesis-data/'])
+    subprocess.run(['sudo', 'cp', 'deposit_contract.txt', '/opt/ethpillar/el-cl-genesis-data/'])
+    subprocess.run(['sudo', 'cp', 'deposit_contract_block.txt', '/opt/ethpillar/el-cl-genesis-data/'])
+    subprocess.run(['sudo', 'cp', 'deposit_contract_block_hash.txt', '/opt/ethpillar/el-cl-genesis-data/'])
     
     shutil.rmtree('/tmp/network_config')
     # Restore original working directory
@@ -553,9 +554,9 @@ def download_and_install_nethermind():
         nethermind_exec_flag = f'''--log=INFO --Sync.SnapSync=true --JsonRpc.Enabled=true --JsonRpc.EnabledModules=net,eth,consensus,subscribe,web3,admin --JsonRpc.EngineHost=0.0.0.0 --JsonRpc.EnginePort=8551 --data-dir=/var/lib/nethermind --Network.DiscoveryPort={EL_P2P_PORT} --Network.P2PPort={EL_P2P_PORT} --Network.MaxActivePeers={EL_MAX_PEER_COUNT} --JsonRpc.Port={EL_RPC_PORT} --Metrics.Enabled=true --Metrics.ExposePort=6060 --JsonRpc.JwtSecretFile={JWTSECRET_PATH} --Pruning.Mode=Hybrid --Pruning.FullPruningTrigger=VolumeFreeSpace --Pruning.FullPruningThresholdMb=300000'''
         
         if eth_network == 'endurance':
-            nethermind_exec_flag = f'{nethermind_exec_flag} --Network.StaticPeers={EL_BOOTNODES} --config=none --Init.ChainSpecPath=/el-cl-genesis-data/custom_config_data/chainspec.json'
+            nethermind_exec_flag = f'{nethermind_exec_flag} --Network.StaticPeers={EL_BOOTNODES} --config=none --Init.ChainSpecPath=/opt/ethpillar/el-cl-genesis-data/chainspec.json'
         elif eth_network == 'endurance_devnet':
-            nethermind_exec_flag = f'{nethermind_exec_flag} --Network.StaticPeers={ENDURANCE_DEVNET_EL_BOOTNODES} --config=none --Init.ChainSpecPath=/el-cl-genesis-data/custom_config_data/chainspec.json'
+            nethermind_exec_flag = f'{nethermind_exec_flag} --Network.StaticPeers={ENDURANCE_DEVNET_EL_BOOTNODES} --config=none --Init.ChainSpecPath=/opt/ethpillar/el-cl-genesis-data/chainspec.json'
         else:
             nethermind_exec_flag = f'{nethermind_exec_flag} --config={eth_network}'
         nethermind_service_file = f'''[Unit]
@@ -688,7 +689,7 @@ def install_nimbus():
 
         # Network specific parameters
         if eth_network == 'endurance':
-            _network_params = f'--network=/el-cl-genesis-data/custom_config_data --bootstrap-node={CL_BOOTNODES} --direct-peer={CL_STATICPEERS} --trusted-state-root=TODO: --external-beacon-api-url={sync_url}'
+            _network_params = f'--network=/opt/ethpillar/el-cl-genesis-data --bootstrap-node={CL_BOOTNODES} --direct-peer={CL_STATICPEERS} --trusted-state-root=TODO: --external-beacon-api-url={sync_url}'
         elif eth_network == 'endurance_devnet':
             # Split ENDURANCE_DEVNET_CL_BOOTNODES into a list of enodes
             el_bootnodes = ENDURANCE_DEVNET_CL_BOOTNODES.split(',')
@@ -698,7 +699,7 @@ def install_nimbus():
             direct_peers_str = " ".join([f"--direct-peer={peer}" for peer in direct_peers])
             
             # Update _network_params with the new bootstrap nodes
-            _network_params = f'--network=/el-cl-genesis-data/custom_config_data {bootstrap_nodes} {direct_peers_str} --trusted-state-root=0x0a66edf75765b9d2d7c08f3f294c61172490b49bad1134afd16f4872bf51d394 --external-beacon-api-url={sync_url}'
+            _network_params = f'--network=/opt/ethpillar/el-cl-genesis-data {bootstrap_nodes} {direct_peers_str} --trusted-state-root=0x0a66edf75765b9d2d7c08f3f294c61172490b49bad1134afd16f4872bf51d394 --external-beacon-api-url={sync_url}'
         else:
             _network_params = f'--network={eth_network}'
 
