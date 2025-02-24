@@ -305,7 +305,7 @@ def download_endurance_config(url):
     print(f"Before download_endurance_config:Original directory: {original_dir}")
     print(f"download_endurance_config:URL: {url}")
     print(f"Ready to download endurance network genesis configuration")
-    os.makedirs('/el-cl-genesis-data/custom_config_data', exist_ok=True)
+    subprocess.run(['sudo', 'mkdir', '-p', '/el-cl-genesis-data/custom_config_data'], check=True)
     # Clean up existing directory if it exists
     if os.path.exists('/tmp/network_config'):
         shutil.rmtree('/tmp/network_config')
