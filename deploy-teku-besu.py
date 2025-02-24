@@ -54,18 +54,19 @@ load_dotenv("env")
 EL_P2P_PORT=os.getenv('EL_P2P_PORT')
 EL_RPC_PORT=os.getenv('EL_RPC_PORT')
 EL_MAX_PEER_COUNT=os.getenv('EL_MAX_PEER_COUNT')
-EL_BOOTNODES=os.getenv('EL_BOOTNODES')
 CL_P2P_PORT=os.getenv('CL_P2P_PORT')
 CL_REST_PORT=os.getenv('CL_REST_PORT')
 CL_MAX_PEER_COUNT=os.getenv('CL_MAX_PEER_COUNT')
 CL_IP_ADDRESS=os.getenv('CL_IP_ADDRESS')
 
 # Endurance Mainnet
+EL_BOOTNODES=os.getenv('EL_BOOTNODES')
 CL_TRUSTPEERS=os.getenv('CL_TRUSTPEERS')
 CL_STATICPEERS=os.getenv('CL_STATICPEERS')
 CL_BOOTNODES=os.getenv('CL_BOOTNODES')
 
 # Endurance Devnet
+ENDURANCE_DEVNET_EL_BOOTNODES=os.getenv('ENDURANCE_DEVNET_EL_BOOTNODES')
 ENDURANCE_DEVNET_CL_STATICPEERS=os.getenv('ENDURANCE_DEVNET_CL_STATICPEERS')
 ENDURANCE_DEVNET_CL_TRUSTPEERS=os.getenv('ENDURANCE_DEVNET_CL_TRUSTPEERS')
 ENDURANCE_DEVNET_CL_BOOTNODES=os.getenv('ENDURANCE_DEVNET_CL_BOOTNODES')
@@ -564,9 +565,9 @@ def download_and_install_besu():
         besu_exec_flag = f''' --p2p-port={EL_P2P_PORT} --rpc-http-port={EL_RPC_PORT} --engine-rpc-port=8551 --max-peers={EL_MAX_PEER_COUNT} --metrics-enabled=true --metrics-port=6060 --rpc-http-enabled=true --sync-mode=SNAP --data-storage-format=BONSAI  --data-path=/var/lib/besu --engine-jwt-secret={JWTSECRET_PATH}'''
 
         if eth_network == 'endurance':
-            besu_exec_flag = f'''{besu_exec_flag} --network-id=648 --genesis-file=/el-cl-genesis-data/custom_config_data/besu.json'''
+            besu_exec_flag = f'''{besu_exec_flag} --bootnodes={EL_BOOTNODES} --network-id=648 --genesis-file=/el-cl-genesis-data/custom_config_data/besu.json'''
         elif eth_network == 'endurance_devnet':
-            besu_exec_flag = f'{besu_exec_flag} --network-id=6480000002 --genesis-file=/el-cl-genesis-data/custom_config_data/besu.json'
+            besu_exec_flag = f'{besu_exec_flag} --bootnodes={ENDURANCE_DEVNET_EL_BOOTNODES} --network-id=6480000002 --genesis-file=/el-cl-genesis-data/custom_config_data/besu.json'
         else:
             besu_exec_flag = f'{besu_exec_flag} --network={eth_network}'
         besu_service_file = f'''[Unit]
