@@ -292,7 +292,7 @@ def download_endurance_config(url):
     print(f"Before download_endurance_config:Original directory: {original_dir}")
     print(f"download_endurance_config:URL: {url}")
     print(f"Ready to download endurance network genesis configuration")
-    os.makedirs('/el-cl-genesis-data/custom_config_data', exist_ok=True)
+    subprocess.run(['sudo', 'mkdir', '-p', '/el-cl-genesis-data/custom_config_data'], check=True)
     # Clean up existing directory if it exists
     if os.path.exists('/tmp/network_config'):
         shutil.rmtree('/tmp/network_config')
@@ -326,7 +326,7 @@ elif eth_network == "sepolia":
 elif eth_network == "endurance":
     sync_urls = endurance_sync_urls
 elif eth_network == "endurance_devnet":
-    # download_endurance_config("https://github.com/OpenFusionist/devnet_network_config")
+    download_endurance_config("https://github.com/OpenFusionist/devnet_network_config")
     sync_urls = endurance_devnet_sync_urls
 
 # Use a random sync url
