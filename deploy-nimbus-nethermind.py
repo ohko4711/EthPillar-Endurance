@@ -689,7 +689,7 @@ def install_nimbus():
 
         # Network specific parameters
         if eth_network == 'endurance':
-            _network_params = f'--network=/opt/ethpillar/el-cl-genesis-data --bootstrap-node={CL_BOOTNODES} --direct-peer={CL_STATICPEERS} --trusted-state-root=TODO: --external-beacon-api-url={sync_url}'
+            _network_params = f'--network=/opt/ethpillar/el-cl-genesis-data --bootstrap-node={CL_BOOTNODES} --direct-peer={CL_STATICPEERS}'
         elif eth_network == 'endurance_devnet':
             # Split ENDURANCE_DEVNET_CL_BOOTNODES into a list of enodes
             el_bootnodes = ENDURANCE_DEVNET_CL_BOOTNODES.split(',')
@@ -699,7 +699,7 @@ def install_nimbus():
             direct_peers_str = " ".join([f"--direct-peer={peer}" for peer in direct_peers])
             
             # Update _network_params with the new bootstrap nodes
-            _network_params = f'--network=/opt/ethpillar/el-cl-genesis-data {bootstrap_nodes} {direct_peers_str} --trusted-state-root=0x0a66edf75765b9d2d7c08f3f294c61172490b49bad1134afd16f4872bf51d394 --external-beacon-api-url={sync_url}'
+            _network_params = f'--network=/opt/ethpillar/el-cl-genesis-data {bootstrap_nodes} {direct_peers_str}'
         else:
             _network_params = f'--network={eth_network}'
 
@@ -734,16 +734,17 @@ WantedBy=multi-user.target
         os.remove(nimbus_temp_file)
 
 def run_nimbus_checkpoint_sync():
+    network_config = eth_network
     if eth_network == 'endurance' or eth_network == 'endurance_devnet':
-        print(f'for custom network, already integrated trustedNodeSync in command')
-        return
+        print(f'for endurance network, use custom network config: /opt/ethpillar/el-cl-genesis-data ')
+        network_config = '/opt/ethpillar/el-cl-genesis-data'
     if sync_url is not None and not VALIDATOR_ONLY:
         print(f'>> Running Checkpoint Sync. Using Sync URL: {sync_url}')
         db_path = "/var/lib/nimbus/db"
         os.system(f'sudo rm -rf {db_path}')
         subprocess.run([
             'sudo', '/usr/local/bin/nimbus_beacon_node', 'trustedNodeSync',
-            f'--network={eth_network}', '--data-dir=/var/lib/nimbus',
+            f'--network={network_config}', '--data-dir=/var/lib/nimbus',
             f'--trusted-node-url={sync_url}', '--backfill=false'
         ])
         os.system(f'sudo chown -R consensus:consensus {db_path}')
