@@ -384,6 +384,8 @@ def install_mevboost():
             exit(1)
 
         # Download the latest release binary
+        # TODO: 使用自定义版本支持自定义genesis-fork-version 读取, 等待rc版本发布后更新
+        download_url = "https://github.com/flashbots/mev-boost/releases/download/v1.9-rc2/mev-boost_1.9-rc2_linux_amd64.tar.gz"
         print(f">> Downloading mevboost > URL: {download_url}")
 
         try:
