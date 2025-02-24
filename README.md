@@ -107,7 +107,7 @@ sudo apt-get update && sudo apt-get install git curl ccze bc tmux
 
 ```bash
 mkdir -p ~/git/ethpillar
-git clone https://github.com/coincashew/ethpillar.git ~/git/ethpillar
+git clone https://github.com/ohko4711/EthPillar-Endurance.git ~/git/ethpillar
 sudo ln -s ~/git/ethpillar/ethpillar.sh /usr/local/bin/ethpillar
 ```
 
