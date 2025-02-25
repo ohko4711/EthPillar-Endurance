@@ -328,6 +328,7 @@ elif eth_network == "sepolia":
     sync_urls = sepolia_sync_urls
 elif eth_network == "endurance":
     sync_urls = endurance_sync_urls
+    download_endurance_config("https://github.com/OpenFusionist/network_config")
 elif eth_network == "endurance_devnet":
     download_endurance_config("https://github.com/OpenFusionist/devnet_network_config")
     sync_urls = endurance_devnet_sync_urls
@@ -512,22 +513,26 @@ def download_and_install_reth():
             print("Error: Unknown binary architecture.")
             exit(1)
 
-        # Search for the asset with the name that matches the architecture
+        # Search for the asset with the exact name pattern
         assets = response.json()['assets']
         download_url = None
         tar_filename = None
+        expected_filename = f'reth-{reth_version}-{_arch}-unknown-linux-gnu.tar.gz'
         for asset in assets:
-            if f'reth-{_arch}-unknown-linux-gnu.tar.gz' in asset['name']:
+            if asset['name'] == expected_filename:
                 download_url = asset['browser_download_url']
                 tar_filename = asset['name']
                 break
 
         if download_url is None or tar_filename is None:
-            print("Error: Could not find the download URL for the latest release.")
+            print(f"Error: Could not find the download URL for the latest release (version {reth_version}).")
+            print("Available assets:")
+            for asset in assets:
+                print(f"- {asset['name']}")
             exit(1)
 
         # Download the latest release binary
-        print(f">> Downloading Reth > URL: {download_url}")
+        print(f">> Downloading Reth {reth_version} > URL: {download_url}")
 
         try:
             # Download the file
@@ -550,14 +555,20 @@ def download_and_install_reth():
         # Create a temporary directory for extraction
         with tempfile.TemporaryDirectory() as temp_dir:
             # Extract the binary to the temporary directory
-            subprocess.run(["tar", "xzf", temp_path, "-C", temp_dir])
+            result = subprocess.run(["tar", "xzf", temp_path, "-C", temp_dir], capture_output=True, text=True)
+            if result.returncode != 0:
+                print(f"Error extracting: {result.stderr}")
+                exit(1)
 
-            # Copy the reth binary to /usr/local/bin
-            subprocess.run(["sudo", "cp", f"{temp_dir}/reth", "/usr/local/bin/"])
+            # Copy the reth binary directly to /usr/local/bin
+            result = subprocess.run(["sudo", "cp", "-a", f"{temp_dir}/reth", "/usr/local/bin/"], capture_output=True, text=True)
+            if result.returncode != 0:
+                print(f"Error copying: {result.stderr}")
+                exit(1)
 
         # Set permissions and ownership
         subprocess.run(["sudo", "chmod", "a+x", "/usr/local/bin/reth"])
-        subprocess.run(['sudo', 'chown', 'execution:execution', '/usr/local/bin/reth'])
+        subprocess.run(["sudo", "chown", "execution:execution", "/usr/local/bin/reth"])
 
         # Remove the temporary tar file
         os.remove(temp_path)
@@ -591,7 +602,6 @@ ExecStart=/usr/local/bin/reth {reth_exec_flag}
 [Install]
 WantedBy=multi-user.target
 '''
-
         reth_temp_file = 'execution_temp.service'
         global reth_service_file_path
         reth_service_file_path = '/etc/systemd/system/execution.service'
