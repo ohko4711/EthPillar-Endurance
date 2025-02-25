@@ -306,7 +306,7 @@ def download_endurance_config(url):
     subprocess.run(['bash', './decompress.sh'])
     # Use sudo to copy files
     print(f'copy custom genesis file to /opt/ethpillar/el-cl-genesis-data')
-    subprocess.run(['sudo', 'cp', 'chainspec.json', '/opt/ethpillar/el-cl-genesis-data/'])
+    subprocess.run(['sudo', 'cp', 'genesis.json', '/opt/ethpillar/el-cl-genesis-data/'])
     subprocess.run(['sudo', 'cp', 'genesis.ssz', '/opt/ethpillar/el-cl-genesis-data/'])
     subprocess.run(['sudo', 'cp', 'config.yaml', '/opt/ethpillar/el-cl-genesis-data/'])
     subprocess.run(['sudo', 'cp', 'deploy_block.txt', '/opt/ethpillar/el-cl-genesis-data/'])
