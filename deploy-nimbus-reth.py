@@ -574,7 +574,7 @@ def download_and_install_reth():
         os.remove(temp_path)
 
         ##### RETH SERVICE FILE ###########
-        reth_exec_flag = f'''node --datadir=/var/lib/reth --port={EL_P2P_PORT} --http --http.addr=0.0.0.0 --http.port={EL_RPC_PORT} --ws --ws.addr=0.0.0.0 --authrpc.jwtsecret={JWTSECRET_PATH} --metrics=0.0.0.0:6060 --authrpc.addr=0.0.0.0 --authrpc.port=8551'''
+        reth_exec_flag = f'''node --full --datadir=/var/lib/reth --port={EL_P2P_PORT} --http --http.addr=0.0.0.0 --http.port={EL_RPC_PORT} --ws --ws.addr=0.0.0.0 --authrpc.jwtsecret={JWTSECRET_PATH} --metrics=0.0.0.0:6060 --authrpc.addr=0.0.0.0 --authrpc.port=8551'''
         
         if eth_network == 'endurance':
             reth_exec_flag = f'{reth_exec_flag} --chain=/opt/ethpillar/el-cl-genesis-data/genesis.json --bootnodes={EL_BOOTNODES} --trusted-peers={EL_BOOTNODES}'
