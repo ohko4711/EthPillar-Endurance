@@ -117,11 +117,12 @@ function _getEthAddy(){
 
 function _getNetwork(){
     NETWORK=$(whiptail --title "Network" --menu \
-          "For which network are you generating validator keys?" 12 90 4 \
+          "For which network are you generating validator keys?" 12 90 5 \
           "mainnet" "Ethereum - Real ETH. Real staking rewards." \
           "holesky" "long term Testnet  - Suitable for staking practice." \
           "ephemery" "short term Testnet - Ideal for staking practice. Monthly resets." \
           "endurance_devnet" "short term for Endurance Devnet - Ideal for staking practice. No rewards." \
+          "endurance" "Endurance - Real ACE. Real staking rewards.." \
           3>&1 1>&2 2>&3)
 }
 
@@ -235,15 +236,25 @@ function setConfig(){
             EXPLORER="https://beaconlight.ephemery.dev"
           ;;
           endurance_devnet)
-            LAUNCHPAD_URL="https://staking.fusionist.io/en/"
-            LAUNCHPAD_URL_LIDO=""  # No Lido support for endurance devnet
-            CSM_FEE_RECIPIENT_ADDRESS=""  # No CSM support for endurance devnet
-            CSM_WITHDRAWAL_ADDRESS=""  # No CSM support for endurance devnet
-            CSM_SENTINEL_URL=""  # No CSM sentinel for endurance devnet
+            LAUNCHPAD_URL="https://staking-launchpad-ace.deno.dev/en/"
+            LAUNCHPAD_URL_LIDO=""
+            CSM_FEE_RECIPIENT_ADDRESS=""
+            CSM_WITHDRAWAL_ADDRESS=""
+            CSM_SENTINEL_URL=""
             FAUCET=""
             HOMEPAGE="https://www.fusionist.io/"
             # TODO: config beaconcha.in for endurance devnet solv bigtabel issues
             EXPLORER="http://78.46.91.61:9777/"
+          ;;
+          endurance)
+            LAUNCHPAD_URL="https://staking.fusionist.io/en/"
+            LAUNCHPAD_URL_LIDO=""
+            CSM_FEE_RECIPIENT_ADDRESS=""  
+            CSM_WITHDRAWAL_ADDRESS=""  
+            CSM_SENTINEL_URL=""
+            FAUCET=""
+            HOMEPAGE="https://www.fusionist.io/"
+            EXPLORER="https://beacon.fusionist.io"
           ;;
     esac
 
@@ -414,6 +425,7 @@ function queryValidatorQueue(){
     BEACONCHAIN_URLS["ephemery"]="https://beaconchain.ephemery.dev"
     # TODO: temp use maninet https://beacon.fusionist.io//api/v1/validators/queue
     BEACONCHAIN_URLS["endurance_devnet"]="https://beacon.fusionist.io"  
+    BEACONCHAIN_URLS["endurance"]="https://beacon.fusionist.io"
 
     # Dencun entry churn cap
     CHURN_ENTRY_PER_EPOCH=8

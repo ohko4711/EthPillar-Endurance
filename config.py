@@ -25,6 +25,11 @@ endurance_devnet_relay_options = [
     {'name': 'devnet', 'url': 'http://0xa55c1285d84ba83a5ad26420cd5ad3091e49c55a813eee651cd467db38a8c8e63192f47955e9376f6b42f6d190571cb5@95.217.233.186:9062'}
 ]
 
+endurance_relay_options = [
+    {'name': 'mainnet-eur', 'url': 'http://0xb1237e4b469262f305cb7607b74264f602c0f30f9405e63ce0283e83c240f4699981e01ba3fe40c5261b581fe1fdd0dd@relay-eur.endurancehub.org'},
+    {'name': 'mainnet-us', 'url': 'http://0x8aaa802de39ce9ab3f0fe937681bff1ec325894a5471ead6dd91c2e7465cf26a3a9cd24478837fe24fac957e014aa3bb@relay-us.endurancehub.org'}
+]
+
 # Checkpoint-Sync Data
 mainnet_sync_urls = [
     ("ETHSTAKER", "https://beaconstate.ethstaker.cc"),
