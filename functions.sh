@@ -205,6 +205,9 @@ getNetwork(){
     648)
       NETWORK="Endurance Mainnet"
       ;;
+    6480000002)
+      NETWORK="Endurance Devnet"
+      ;;
     *)
       getEphemeryChainID
       if [[ "$result" = "$EPH_CHAIN_ID" ]]; then
@@ -987,6 +990,8 @@ checkValidatorQueue(){
     BEACONCHAIN_URLS["Mainnet"]="https://beaconcha.in"
     BEACONCHAIN_URLS["Holesky"]="https://holesky.beaconcha.in"
     BEACONCHAIN_URLS["Ephemery"]="https://beaconchain.ephemery.dev"
+    BEACONCHAIN_URLS["Endurance Devnet"]="https://beacon.fusionist.io"
+    BEACONCHAIN_URLS["Endurance Mainnet"]="https://beacon.fusionist.io"
     # Dencun entry churn cap
     CHURN_ENTRY_PER_EPOCH=8
     CHURN_RATE_CONSTANT=65536
