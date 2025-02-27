@@ -21,8 +21,8 @@ source $BASE_DIR/functions.sh
 source $BASE_DIR/env
 
 # Pinned version of ethstaker-deposit-cli
-edc_version="0.0.2"
-edc_hash="4ac463b"
+edc_version="1.1.0-dev"
+edc_hash="255c848"
 
 # Get machine info
 _platform=$(get_platform)
@@ -35,7 +35,15 @@ function downloadEthstakerDepositCli(){
             echo "ethstaker_deposit-cli is up-to-date"
             return
         else
-            rm -rf $STAKING_DEPOSIT_CLI_DIR/ethstaker_deposit-cli
+            echo "Warning: The old version of ethstaker_deposit-cli will be deleted. This may remove previously generated keystores."
+            echo "Please ensure you have backed up all important data."
+            read -p "Do you want to continue? (y/n): " confirm
+            if [[ $confirm == [yY] || $confirm == [yY][eE][sS] ]]; then
+                rm -rf $STAKING_DEPOSIT_CLI_DIR/ethstaker_deposit-cli
+            else
+                echo "Operation cancelled."
+                return
+            fi
             echo "ethstaker_deposit-cli update available"
             echo "Updating to v${edc_version}"
             echo "from ${edc_version_installed}"
