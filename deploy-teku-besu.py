@@ -335,8 +335,7 @@ elif eth_network == "sepolia":
 elif eth_network == "ephemery":
     sync_urls = ephemery_sync_urls
 elif eth_network == "endurance":
-    # DEBUG: temp distable 
-    # download_endurance_config("https://github.com/OpenFusionist/network_config")
+    download_endurance_config("https://github.com/OpenFusionist/network_config")
     sync_urls = endurance_sync_urls
 elif eth_network == "endurance_devnet":
     download_endurance_config("https://github.com/OpenFusionist/devnet_network_config")
