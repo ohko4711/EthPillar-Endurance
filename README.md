@@ -10,7 +10,7 @@
 ## :arrow\_forward: Quickstart: Ubuntu One-liner Install
 
 ```bash
-/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/coincashew/EthPillar/main/install.sh)"
+/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/ohko4711/EthPillar-Endurance/main/install.sh)"
 ```
 
 ## :new: What is EthPillar?
@@ -92,7 +92,7 @@ Open a terminal window from anywhere by typing `Ctrl+Alt+T`
 To install, paste the following:
 
 ```bash
-/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/coincashew/EthPillar/main/install.sh)"
+/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/ohko4711/EthPillar-Endurance/main/install.sh)"
 ```
 
 ## :handshake: Option 2: Manual Install
@@ -268,9 +268,9 @@ ETH accepted on Mainnet, Arbitrum, Base, Optimism. :pray:
 
 ## :telephone: Get in touch
 
-Have questions? Chat with other home stakers on [Discord](https://discord.gg/dEpAVWgFNB) or open PRs/issues on [Github](https://github.com/coincashew/ethpillar).&#x20;
+Have questions? Chat with other home stakers on [Discord](https://discord.gg/dEpAVWgFNB) or open PRs/issues on [Github](https://github.com/ohko4711/EthPillar-Endurance).&#x20;
 
-Open source source code available here: [https://github.com/coincashew/EthPillar](https://github.com/coincashew/EthPillar)
+Open source source code available here: [https://github.com/ohko4711/EthPillar-Endurance](https://github.com/ohko4711/EthPillar-Endurance)
 
 ## :heart: Donations
 
@@ -301,10 +301,10 @@ git pull
 
 We appreciate any help! To join in:
 
-* Star the project on [GitHub](https://github.com/coincashew/EthPillar).
+* Star the project on [GitHub](https://github.com/ohko4711/EthPillar-Endurance).
 * Share the project on X or reddit. Talk about your experiences with solo staking.
-* Provide feedback on [Github](https://github.com/coincashew/EthPillar/issues).
-* [Submit PRs](https://github.com/coincashew/EthPillar/pulls) to improve the code.
+* Provide feedback on [Github](https://github.com/ohko4711/EthPillar-Endurance/issues).
+* [Submit PRs](https://github.com/ohko4711/EthPillar-Endurance/pulls) to improve the code.
 
 ## :tada: Credits
 
