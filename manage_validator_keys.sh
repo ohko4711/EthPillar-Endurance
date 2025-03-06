@@ -380,7 +380,7 @@ function setLaunchPadMessage(){
     [[ -n ${FAUCET} ]] && MSG_FAUCET=">> Faucet Available: $FAUCET"
     [[ -n ${HOMEPAGE} ]] && MSG_HOMEPAGE=">> Network Homepage: $HOMEPAGE"
     [[ -n ${EXPLORER} ]] && MSG_EXPLORER=">> Explorer:         $EXPLORER"
-    MSG_LAUNCHPAD="1) Visit the Launchpad: $LAUNCHPAD_URL
+    MSG_LAUNCHPAD="1) Visit the Launchpad: $LAUNCHPAD_URL\n(or use https://github.com/ohko4711/staking-batch-depositer for batch deposit)
 \n2) Upload your deposit_data-#########.json found in the directory:
 \n$KEYFOLDER
 \n3) Connect the Launchpad with your wallet, review and accept terms.
