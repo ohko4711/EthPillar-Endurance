@@ -130,7 +130,7 @@ if not args.network and not args.skip_prompts:
     index = SelectionMenu.get_selection(valid_networks,title='Validator Install Quickstart :: CoinCashew.com',subtitle='Installs Besu EL / Teku BN / Teku VC / MEVboost\nSelect Ethereum network:')
 
     # Exit selected
-    if index == 6:
+    if index == len(valid_networks):
         # add some hint for choice which network
         print("Exiting...", valid_networks[index])
         time.sleep(5)
