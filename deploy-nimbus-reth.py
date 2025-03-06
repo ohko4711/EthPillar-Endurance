@@ -43,7 +43,7 @@ def clear_screen():
 clear_screen()  # Call the function to clear the screen
 
 # Valid configurations
-valid_networks = ['MAINNET', 'HOLESKY', 'SEPOLIA', 'ENDURANCE', 'ENDURANCE_DEVNET']
+valid_networks = ['MAINNET', 'HOLESKY', 'SEPOLIA', 'ENDURANCE']
 valid_exec_clients = ['RETH']
 valid_consensus_clients = ['NIMBUS']
 valid_install_configs = ['Solo Staking Node', 'Full Node Only', 'Lido CSM Staking Node', 'Lido CSM Validator Client Only' ,'Validator Client Only', 'Failover Staking Node']

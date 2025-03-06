@@ -125,11 +125,10 @@ function _getEthAddy(){
 
 function _getNetwork(){
     NETWORK=$(whiptail --title "Network" --menu \
-          "For which network are you generating validator keys?" 12 90 5 \
+          "For which network are you generating validator keys?" 12 90 4 \
           "mainnet" "Ethereum - Real ETH. Real staking rewards." \
           "holesky" "long term Testnet  - Suitable for staking practice." \
           "ephemery" "short term Testnet - Ideal for staking practice. Monthly resets." \
-          "endurance_devnet" "short term for Endurance Devnet - Ideal for staking practice. No rewards." \
           "endurance" "Endurance - Real ACE. Real staking rewards.." \
           3>&1 1>&2 2>&3)
 }
