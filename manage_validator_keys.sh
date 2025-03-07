@@ -383,7 +383,7 @@ function setLaunchPadMessage(){
 \n2) Upload your deposit_data-#########.json found in the directory:
 \n$KEYFOLDER
 \n3) Connect the Launchpad with your wallet, review and accept terms.
-\n4) Complete the 32 ETH deposit transaction(s).
+\n4) Complete the 32 ACE deposit transaction(s).
 \n5) Wait for validators to become active. $MSG_VALIDATOR_QUEUE
 \nUseful links:
 $MSG_HOMEPAGE
