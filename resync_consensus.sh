@@ -59,10 +59,10 @@ function resyncClient(){
 		Ephemery)
 			URL="https://ephemery.beaconstate.ethstaker.cc"
 			;;
-		Endurance Mainnet)
+		"Endurance Mainnet")
 			URL="https://checkpointz.fusionist.io"
 			;;
-		Endurance Devnet)
+		"Endurance Devnet")
 			URL="http://78.46.91.61:9781"
 			;;
 		esac
@@ -71,8 +71,9 @@ function resyncClient(){
 		sudo rm -rf /var/lib/nimbus/db
 
 		# Set network configuration
-		NETWORK_CONFIG=$(echo $NETWORK | tr '[:upper:]' '[:lower:]')
-		if [[ "$NETWORK" == "endurance mainnet" || "$NETWORK" == "endurance devnet" ]]; then
+		NETWORK_LOWER=$(echo $NETWORK | tr '[:upper:]' '[:lower:]')
+		NETWORK_CONFIG=$NETWORK_LOWER
+		if [[ "$NETWORK_LOWER" == "endurance mainnet" || "$NETWORK_LOWER" == "endurance devnet" ]]; then
 			echo "For Endurance network, using custom network config: /opt/ethpillar/el-cl-genesis-data"
 			NETWORK_CONFIG="/opt/ethpillar/el-cl-genesis-data"
 		fi
