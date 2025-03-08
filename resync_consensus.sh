@@ -59,13 +59,26 @@ function resyncClient(){
 		Ephemery)
 			URL="https://ephemery.beaconstate.ethstaker.cc"
 			;;
+		Endurance Mainnet)
+			URL="https://checkpointz.fusionist.io"
+			;;
+		Endurance Devnet)
+			URL="http://78.46.91.61:9781"
+			;;
 		esac
 
 		sudo systemctl stop consensus
 		sudo rm -rf /var/lib/nimbus/db
 
+		# Set network configuration
+		NETWORK_CONFIG=$(echo $NETWORK | tr '[:upper:]' '[:lower:]')
+		if [[ "$NETWORK" == "endurance mainnet" || "$NETWORK" == "endurance devnet" ]]; then
+			echo "For Endurance network, using custom network config: /opt/ethpillar/el-cl-genesis-data"
+			NETWORK_CONFIG="/opt/ethpillar/el-cl-genesis-data"
+		fi
+
 		sudo -u consensus /usr/local/bin/nimbus_beacon_node trustedNodeSync \
-		--network=$(echo $NETWORK | tr '[:upper:]' '[:lower:]') \
+		--network=$NETWORK_CONFIG \
 		--trusted-node-url=$URL \
 		--data-dir=/var/lib/nimbus \
 		--backfill=false
