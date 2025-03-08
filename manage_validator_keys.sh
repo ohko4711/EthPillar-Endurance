@@ -129,7 +129,7 @@ function _getNetwork(){
           "mainnet" "Ethereum - Real ETH. Real staking rewards." \
           "holesky" "long term Testnet  - Suitable for staking practice." \
           "ephemery" "short term Testnet - Ideal for staking practice. Monthly resets." \
-          "endurance" "Endurance - Real ACE. Real staking rewards.." \
+          "endurance_mainnet" "Endurance - Real ACE. Real staking rewards.." \
           3>&1 1>&2 2>&3)
 }
 
@@ -253,7 +253,7 @@ function setConfig(){
             # TODO: config beaconcha.in for endurance devnet solv bigtabel issues
             EXPLORER="http://78.46.91.61:9777/"
           ;;
-          endurance)
+          endurance_mainnet)
             LAUNCHPAD_URL="https://staking.fusionist.io/en/"
             LAUNCHPAD_URL_LIDO=""
             CSM_FEE_RECIPIENT_ADDRESS=""  
@@ -432,7 +432,7 @@ function queryValidatorQueue(){
     BEACONCHAIN_URLS["ephemery"]="https://beaconchain.ephemery.dev"
     # TODO: temp use maninet https://beacon.fusionist.io//api/v1/validators/queue
     BEACONCHAIN_URLS["endurance_devnet"]="https://beacon.fusionist.io"  
-    BEACONCHAIN_URLS["endurance"]="https://beacon.fusionist.io"
+    BEACONCHAIN_URLS["endurance_mainnet"]="https://beacon.fusionist.io"
 
     # Dencun entry churn cap
     CHURN_ENTRY_PER_EPOCH=8
